@@ -1,0 +1,5 @@
+Accession	Organism	Gene name	Seq type	Reference	Length
+sample1	Homo sapiens	acrosin binding protein	mRNA	NM_032489.3	1905
+sample2	Pan troglodytes	potassium voltage-gated channel subfamily A member 1 	mRNA	XM_003313436.4	7990
+sample3	Homo sapiens	inhibitor of growth family member 4	mRNA	XM_011520964.2	1321
+sample4	Macaca mulatta	NOP2 nucleolar protein	mRNA	XM_015150909.2	2759
