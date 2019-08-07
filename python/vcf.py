@@ -60,17 +60,17 @@ def main():
 	Assign individuals to groups within which allele frequencies are computed
 	I tried to code it such that groups may be removed, and those indices will not be iterated through
 	'''
-	Groups = {}
+	Groups = []
 	# 0: Tuskless MZ savanna elephants
 	# 1: Tusked MZ savanna elephants
 	# 2: Non-MZ savanna elephants (tusked)
 	# 3: Forest elephants
 	# 4: Asian elephants
-	Groups[0] = ["0045B", "2983B", "2984B", "2986A", "G17A", "G19A", "G22A", "T2B"] # T1A excluded, contaminated
-	Groups[1] = ["2981B", "2982B", "2985B", "G18A", "G20A", "G21A"]
-	Groups[2] = ["SRR958467", "SRR958468", "ERR2260496", "ERR2260497"]
-	Groups[3] = ["Lcyc1", "Lcyc2"]
-	Groups[4] = ["Emax1", "Emax2", "Emax3", "Emax4", "Emax5", "Emax6"]
+	Groups.append(["0045B", "2983B", "2984B", "2986A", "G17A", "G19A", "G22A", "T2B"]) # T1A excluded, contaminated
+	Groups.append(["2981B", "2982B", "2985B", "G18A", "G20A", "G21A"])
+	Groups.append(["SRR958467", "SRR958468", "ERR2260496", "ERR2260497"])
+	Groups.append(["Lcyc1", "Lcyc2"])
+	Groups.append(["Emax1", "Emax2", "Emax3", "Emax4", "Emax5", "Emax6"])
 
 	'''
 	make list of samples to include or exclude in all downstream analyses
@@ -107,21 +107,23 @@ def main():
 
 	# open output file and print the column names
 	outFile = open('Results_allVariants.txt','w')
-	print("Chrom", end="\t", file=outFile)
-	print("Pos", end="\t", file=outFile)
-	print("RefAllele", end="\t", file=outFile)
-	print("AltAllele", end="\t", file=outFile)
-	print("variantType", end="\t", file=outFile)
-	print("Effect", end="\t", file=outFile)
-	print("geneName", end="\t", file=outFile)
-	print("geneNameEnsembl", end="\t", file=outFile)
+	col_names = [
+		'Chrom',
+		'Pos',
+		'RefAllele',
+		'AltAllele',
+		'variantType',
+		'Effect',
+		'geneName',
+		'geneNameEnsembl',
+	]
 	for grp in sorted(Groups):
 		x = "AFGroup_" + str(grp)
-		print(x, end="\t", file=outFile)
+		col_names.append(x)
 	for grp in sorted(Groups):
 		x = "GenosGroup_" + str(grp)
-		print(x, end="\t", file=outFile)
-	print(file=outFile)
+		col_names.append(x)
+	print('\t'.join(col_names), file=outFile)
 
 	# let's start parsing our VCF!
 	for variant in vcf:
@@ -130,7 +132,7 @@ def main():
 			# check if this site has sufficient data, and keep track of how many individuals are missing per group as this number serves as denominator in calculating allele frequency
 			PASS_depthMissData, sampleSizes_missing = filterVariantDepthMissData(variant.gt_depths, variant.gt_types, index2Group, Groups, FilterDP)
 
-			if PASS_metrics == 1 and PASS_depthMissData == 1:
+			if PASS_depthMissData == 1:
 				print(variant.CHROM, " ", variant.end)
 				# calculate allele frequency differences by group
 				# NOTE: gt_types is array of 0,1,2,or 3, corresponding to HOM_REF, HET, HOM_ALT, and UNKNOWN, respectively
@@ -147,12 +149,21 @@ def main():
 						effect = infoList[1]
 						geneName = infoList[3]
 						geneNameEnsembl = infoList[4]
-				print(variant.CHROM, variant.end, variant.REF, variant.ALT, variant.var_type, effect, geneName, geneNameEnsembl, sep="\t", end="\t", file=outFile)
+				fields = [
+					variant.CHROM,
+					variant.end,
+					variant.REF,
+					variant.ALT,
+					variant.var_type,
+					effect,
+					geneName,
+					geneNameEnsembl,
+				]
 				for grp in sorted(Groups):
-					print(AFbyGroup[grp], end="\t", file=outFile)
+					fields.append(AFbyGroup[grp])
 				for grp in sorted(Groups):
-					print(GenosByGroup[grp], end="\t", file=outFile)
-				print(file=outFile)
+					fields.append(GenosByGroup[grp])
+				print('\t'.join(fields), file=outFile)
 
 if __name__ == '__main__':
     sys.exit(main())
