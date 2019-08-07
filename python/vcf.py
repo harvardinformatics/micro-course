@@ -61,11 +61,6 @@ def main():
 	I tried to code it such that groups may be removed, and those indices will not be iterated through
 	'''
 	Groups = []
-	# 0: Tuskless MZ savanna elephants
-	# 1: Tusked MZ savanna elephants
-	# 2: Non-MZ savanna elephants (tusked)
-	# 3: Forest elephants
-	# 4: Asian elephants
 	Groups.append(["0045B", "2983B", "2984B", "2986A", "G17A", "G19A", "G22A", "T2B"]) # T1A excluded, contaminated
 	Groups.append(["2981B", "2982B", "2985B", "G18A", "G20A", "G21A"])
 	Groups.append(["SRR958467", "SRR958468", "ERR2260496", "ERR2260497"])
