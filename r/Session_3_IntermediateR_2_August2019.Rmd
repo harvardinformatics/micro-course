@@ -1,0 +1,287 @@
+---
+title: "intermediate_R_part_2.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Intermediate R Part 2
+
+The goal of this workshop is to build on the fundamentals of data manipulation with the tidyverse we began in Intermediate R Part 1 In that class we learned what tidy data objects (long vs. wide form objects) are, and how to transform data objects using dplyr commands. Today, we will continue to build upon these by introducing how to merge tables, loops, basic statistics, writing functions, and R scripts. 
+
+First, we need to set up our working environment. As we did in Intermediate R Part 1, we will set our working directory, load the **tidyverse** package, and source the **prep_data.R** script in order to load datasets for us to work with.
+
+```{r}
+setwd('/Users/ashultz/Dropbox/Workshops/August_2019_Bioinformatics_Shortcourse_Workshops/intro_to_R/')
+library(tidyverse)
+source("prep_data.R")
+```
+
+
+## Summarzing and aggregating data
+
+Once you have your data organized, you can use the summarize function in dplyr, along with the group_by helper function, to do a lot of powerful stuff.
+
+We'll continue to explore our mms dataset to demonstrate.
+
+Okay, now what can we do with summarize? First, let's just get the total number of M&Ms in this dataset:
+
+```{r}
+mms %>% summarize(total_mms=sum(count))
+```
+
+The group_by function allows us to assign groups, which will then be "unwound" by summarize statements. Easiest to see by example:
+
+```{r}
+mms %>%
+  group_by(BagID) %>%
+  summarize(mms_per_bag=sum(count)) %>% print %>% summarize(total_mms=sum(mms_per_bag))
+```
+
+We can also group by totally differetn variables, like color.
+
+```{r}
+mms %>%
+  group_by(color) %>%
+  summarize(mms_per_color=sum(count)) %>% print %>% summarize(total_mms=sum(mms_per_color))
+```
+
+Note that summarize outputs a new tibble. You can continue to do calculations on this tibble (for example, if you data has many layers), but you cannot call your original tibble again within the same set of pipes.
+
+We can do some tricky stuff with summarize, group_by, and mutate. For example, let's get the fraction of each color in each bag:
+
+```{r}
+mms %>%
+  group_by(BagID) %>%
+  mutate(percent = 100*(count/sum(count))) %>%
+  select(-count) %>%
+  spread(color, percent)
+```
+
+Note there is some subtle stuff going on here. When we us mutant on a grouped tibble, operations like sum() work **within the grouping**. So sum(count) computes the group-wise sum, which means it is easy to get frequencies or percents. 
+
+We can then use this insight to explore the data. For example, let's get the 5 bags of M&Ms with the highest percentage of red candies, conditioning on a weight of at least 47g:
+
+```{r}
+mms %>%
+  group_by(BagID) %>%
+  mutate(percent = 100*(count/sum(count))) %>%
+  select(-count) %>%
+  filter(color == "Red", Weight > 47) %>%
+  arrange(desc(percent)) %>%
+  head(n=5)
+```
+
+Note that we can send this to plotting functions like so:
+
+```{r}
+mms %>%
+  group_by(BagID) %>%
+  mutate(percent = 100*(count/sum(count))) %>%
+  select(-count) %>%
+  filter(color == "Red", Weight > 47) %>%
+  ggplot(aes(percent)) +
+  geom_histogram(bins=15,fill="red")
+```
+
+For the exercises we will be using the housing_clean dataset, let's read the csv we created yesterday.
+```{r}
+housing_clean <- read_csv("housing_dataset_clean.csv")
+
+#If you need to recreate it:
+housing_clean <- housing %>% 
+  as.tibble %>%
+  gather(location, local_index, -Date, -National.US) %>% 
+  separate(location, c("state", "city"),extra="merge") %>%
+  separate(Date, c("year", "month"), extra="drop", remove=F) %>%
+  select(year, month, city, state, local_index, national_index=National.US) %>%
+  arrange(year, month, state, city) %>%
+  mutate(year = as.integer(year), month = month.abb[as.integer(month)], city = sub(".", "_", city, fixed=TRUE), rel_index = local_index/national_index)
+```
+
+## Exercises with summarize and group_by
+
+>  **Exercise 1:**
+> 
+> Using the housing_clean dataset, find the three cities with the highest relative index in February, averaged across the years.
+> 
+> Hint: first filter by month and filter out all values that have missing data with `!is.na()`, then summarize by city using the `mean()` function. 
+
+```{r, echo=TRUE}
+housing_clean %>%
+  filter(month=="Feb", !is.na(rel_index)) %>%
+  group_by(city) %>%
+  summarize(mean_rel_index = mean(rel_index)) %>%
+  arrange(desc(mean_rel_index)) %>%
+  head(n=3)
+```
+
+> **Exercise 2:**
+
+> Now, how has the relative housing index changed through the years, averaged across cities (call year_mean)? Can you produce a line plot of this change?
+> 
+> Hint: First filter out all missing data. To plot, for the aesthetics, set x = year and y = year_mean, and use geom_line().
+
+
+```{r, echo=TRUE}
+housing_clean %>%
+  filter(!is.na(rel_index)) %>%
+  group_by(year) %>%
+  summarize(year_mean = mean(rel_index)) %>%
+  ggplot(aes(x=year,y=year_mean)) +
+  geom_line()
+```
+
+
+## Merging data
+
+As a final data processing step, we'll look at the merge functions in dplyr. These work kind of like sql queries, and take their names from the similar query syntax. All follow the pattern *something*_join. The most common are inner_join, left_join, right_join, and full_join, which keep rows with data in both dataframes, the left dataframe, the right dataframe, or either dataframe, respectively. We'll look at a couple of examples, and then try a few exercises. Here, we'll go back to the bird genes under positive selection dataset, and use two additonal datasets to add some additional information.
+
+First, let's read in the datasets we need. Then, let's just do a join to add gene names to our dataset, merging on NCBI gene ID (entrezgene).
+```{r}
+bird_genes_pvals <- read_csv("data/bird_immune_gene_res_simple.csv")
+gg_geneid_names <- read_csv("data/gg_geneid_names.csv")
+gg_to_hs_trans <- read_csv("data/gg_to_hs_trans.csv")
+
+bird_genes_pvals
+gg_geneid_names
+gg_to_hs_trans
+
+bird_genes_pvals_trans <- left_join(bird_genes_pvals,gg_geneid_names,by=c("entrezgene"="entrezgene"))
+```
+
+Doing a left join means we'll keep all the rows of data in bird_genes_pvals, even if they don't have a match in gg_geneid_names, but in theory everything should have a match.
+
+If we wanted to keep everything in gg_geneid_names, even if they were not included in the comparative genomics dataset, we could use a full join, like so:
+
+```{r}
+bird_genes_pvals_trans2 <- bird_genes_pvals %>%
+  full_join(.,gg_geneid_names,by="entrezgene") %>%
+  select(entrezgene,external_gene_name, FDRPval_busted) %>%
+  print
+```
+
+
+Because we did a full join, we'll get NAs for type for rows where the NCBI gene ID (entrezgene) was not in our comparative genomics table, and NAs for NCBI gene IDs that were not in our gene name translation table.
+
+Inner join just keeps things in both tables. We can use this, for example, to just get the genes that have a gene name, if we first create a filtered tibble.
+
+```{r}
+gg_geneid_names %>%
+  filter(!is.na(external_gene_name)) %>%
+  inner_join(.,bird_genes_pvals,by="entrezgene") %>% print
+```
+
+### Merging Exercise
+
+##Exercise 1
+Earlier we loaded an additional dataset called gg_to_hs_trans. This is another translation table, but this time, it translates chicken NCBI gene IDs (entrezgene) to human NCBI gene IDs. Add the human NCBI gene IDs to the bird_genes_pvales dataset. Explore the resulting dataset - what do you notice about the number of rows? What might have caused this?
+```{r, echo=T}
+bird_genes_pvals_hs <- bird_genes_pvals %>%
+  left_join(gg_to_hs_trans,by="entrezgene")
+
+#View(bird_genes_pvals_hs)
+```
+
+##Exercise 2
+An additional column exists with orthology confidence scores (1 = confidence, 0 = not confident). Add the human NCBI gene IDs to the bird_genes_pvales dataset again. However, this time, only include genes where the confidence score is 1. Don't include the confidence score in the final output.  Did this fix the earlier problem?
+
+```{r, echo=T}
+bird_genes_pvals_hs <- gg_to_hs_trans %>%
+  filter(hsapiens_homolog_orthology_confidence==1) %>%
+  select(-hsapiens_homolog_orthology_confidence) %>%
+  right_join(bird_genes_pvals,by="entrezgene")
+```
+
+##Exercise 3
+What additional command could you add to fix the issues resulting from the earlier exercises? Also, filter out any rows with missing NCBI gene IDs.
+
+```{r, echo=T}
+bird_genes_pvals_hs <- gg_to_hs_trans %>%
+  filter(hsapiens_homolog_orthology_confidence==1) %>%
+  select(-hsapiens_homolog_orthology_confidence) %>%
+  right_join(bird_genes_pvals,by="entrezgene") %>%
+  distinct(entrezgene,.keep_all=T) %>%
+  filter(!is.na(entrezgene))
+```
+
+##Exercise 4
+How many chicken NCBI gene IDs could be assigned to a human NCBI gene ID?
+```{r, echo=T}
+bird_genes_pvals_hs %>%
+  filter(!is.na(entrezgene_hs)) %>%
+  summarize(n())
+```
+
+
+## Statistics
+
+Now let's demonstrate a few statistical tests.
+
+With our bird_genes_pvals dataset, we might want to know if there is any difference in the proportion of lineages under selection and whether or not that gene is under selection across all birds. Let's first make a quick boxplot to look at the data. We are going to add a categorical column with a function called "if_else" (more on that later) as to whether or not a genes is significant.
+
+```{r}
+
+bird_genes_pvals <- bird_genes_pvals %>%
+  mutate(sig_paml = if_else(FDRPval_m2m2a<0.05,true=T,false=F))
+
+bird_genes_pvals %>%
+  ggplot(aes(x=sig_paml,y=prop_sel_branches)) +
+  geom_boxplot()
+```
+
+Our boxplot suggests that there are more specific lineages under selection if the gene is signficant across birds. Let's test that using a T-test.
+
+```{r}
+#note that we can use a logical test as a grouping variable in a formula
+bird_genes_pvals %>%
+  t.test(data=.,prop_sel_branches ~ sig_paml)
+```
+
+We might want to do this non-parameterically using a Wilcoxon Rank Sum Test.
+
+```{r}
+bird_genes_pvals %>%
+  wilcox.test(data=.,prop_sel_branches ~ sig_paml)
+```
+
+We might hypothesize that gene length is correlated with the likelihood of detecting selection. Let's test that with cor.test(), and then plot it to see if our hunch  might be correct.
+
+```{r}
+cor.test(bird_genes_pvals$length, bird_genes_pvals$Omega_m0)
+
+ggplot(bird_genes_pvals,aes(x=length,y=Omega_m0)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Now let's work through a final example that involves both data manipulation and some more statistical tests. Let's say we want to find out whether or not there is any difference in how different models are selecting which genes are under of selection. Let's compare the counts of whether or not a genes is under selection with the Busted model and PAML m2vsm2a model.
+
+
+First, we need to create a new column in our dataframe, categorizing whether or not a genes is signficant according to Busted.
+
+```{r}
+bird_genes_pvals <- bird_genes_pvals %>%
+  mutate(sig_busted = if_else(FDRPval_busted<0.05,true=T,false=F)) %>%
+  filter(!is.na(sig_busted))
+```
+
+Next, let's get a sense of how many genes are under selection in the dataset in each case.
+
+Hint: you will need to filter out any missing values.
+```{r}
+bird_genes_pvals %>%
+  with(.,table(sig_paml,sig_busted))
+```
+
+It seems like there is a difference between the two models in their predictions of which genes are under selection. Let's test this with a chi-squared test. Let's pass the table we made earlier to a chi-sq test.
+
+```{r}
+#to test non-independence using an RxC chisquare test, use chisq.test
+bird_genes_pvals %>%
+  with(.,table(sig_paml,sig_busted)) %>%
+  chisq.test
+```
+

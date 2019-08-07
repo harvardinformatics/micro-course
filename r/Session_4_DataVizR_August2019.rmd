@@ -1,0 +1,729 @@
+---
+title: "Data Visualization in R"
+author: "Allison Shultz"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The goal of this workshop is to teach the grammar of graphics in R, with a focus on **ggplot2**. The consistent grammar implemented in ggplot2 is advantageous both because it is easily extendible - that is you can both produce simple plots, but then develop them into complex publication-ready figures. In addition to the basic ggplot2 R package, many extensions for different types of data have been written using the same standardized grammar.
+
+ggplot2 is part of the tidyverse package, and to make it easier to load our dataset and manipulate it prior to plotting, we will load the entire tidyverse package.
+
+```{r, echo=FALSE}
+library(tidyverse)
+```
+
+To demonstrate how the different plots work, let's import in a dataset into our environment. This is a dataset containing plumage color information for a family of birds called the tanagers.
+
+```{r}
+setwd("~/Dropbox/Workshops/August_2019_Bioinformatics_Shortcourse_Workshops/intro_to_R/")
+tanager_color <- read_csv("data/tanagercolordata.csv")
+tanager_color
+```
+
+
+You notice that our dataset is currently tidy, and in long-format. Each row represents an observation, in this case, information on plumage coloration for each sex of each species (*avg_span* = average contrast among color patches, *volume* = the volume of the avian tetrahedral space, larger values are more colorful, *avg_brill* = average brilliance across color patches, *avg_chroma* = average chroma, or saturation of each color patch, and *avg_sex_dich* = measures of sexual dichromatism, or difference in coloration between males and females for that species). As ggplot2 is part of the tidyverse, it works best with long-format data. In addition to these color measurements, we also have information on which subfamily each species belongs to, habitat preferences (*F* = closed habitat, or forest, *N* = open habitat), and where birds forage (*U* = understory, *C* = canopy, *U/C* = both). If you would like to know more, this dataset comes from this 2017 Evolution paper: <http://onlinelibrary.wiley.com/doi/10.1111/evo.13196/full>. 
+
+
+# Basic grammar of ggplot
+
+There are three key components that make up every ggplot:
+1. **data**
+2. **aesthetic mappings** (which variables in your data map to which visual properties)
+3. **geometric object (geom) function** (a layer describing how to render each observation)
+
+There are other optional components that control the visualization of the plots, but for now, we will focus on getting these three key elements down. The basic formula for these options is:
+
+`ggplot(data=<dataset>, aes(<mappings>)) + <geom_function>()`
+
+Let's make a basic plot using this grammar. You can see that this is really not much more complicated than the base R *plot* function.
+
+```{r}
+ggplot(data=tanager_color, aes(x=avg_brill, y=avg_chroma)) + 
+  geom_point()
+```
+
+Notice that like when we use piping (`%>%`) with dplyr and can make our code easier to read by putting each element on a new line, we can do the same with ggplot after the `+`. That `+` is specifying that we want to add a layer to the plot. As you will see going forward, we can add more than one layer to add other data, statistical summaries, or metadata to make more complex plots.
+
+Also, here we specified what `x` and `y` are, but they are used so commonly, that ggplot2 will always assume that the first `aes()` argument supplied is `x`, and the second is `y`, so we do not need to specify them moving forward.
+
+# Geoms
+
+Geoms are the building blocks of ggplot2, and specify what type of plot you will be drawing. For example, you saw above that `geom_point` draws a **scatterplot**, or associates the `x` and `y` values with points. 
+
+We can divide geoms up into several different categories, such as **individual** geoms, which map each observation you provide to an element of the plot. Alternatively, **collective** geoms will group your points to summarize aspects of your data (e.g. a **boxplot**). Additionally, we can categorize geoms into how many dimensions they are mapping from **1D** to **2D**, or even **3D**.
+
+Another nice feature of ggplot2 is that we can save the data and aesthetic mappings to an object, and then call this object with different geoms or other layers. This can be very useful if you want to explore how different geoms work to visualize your data, or change subtle aspects of the plot.
+
+## 1-D geoms
+
+First, we will explore some of the geoms available for single variables. To facilitate comparing different plot types, let's create a base ggplot2 object called *brill* with an aesthetic mapping the `avg_brill` values. 
+
+```{r}
+brill <- ggplot(tanager_color,aes(avg_brill))
+```
+A simple way to explore the distribution of this variable is with a **histogram**.
+
+```{r}
+brill + geom_histogram()
+```
+
+We likely will want to change the default values for the number of breaks, or the binwidth.
+
+```{r}
+brill + geom_histogram(bins=15)
+brill + geom_histogram(binwidth=0.005)
+```
+
+**Density Plots**
+Similar to histograms, we can make density plots, which smooths out the distribution of data instead of binning the data. We can change how smooth the estimate is with *adjust*. Values smaller than 1 result in less smoothing, and values greater than 1 result in more smoothing.
+
+```{r}
+brill + geom_density()
+brill + geom_density(adjust=0.1)
+brill + geom_density(adjust=5)
+```
+
+### Exercises
+>1. Pick another continuous variable in the dataset and produce a histogram. Try producing different versions with different binwidths.
+>
+>2. Try adding geom_freqpoly() to your histogram plot in a second layer. What does it look like this plot is going? Does it match your histogram? If not, why?
+>
+>3. Now try adding a density plot to your plot. What happens if you call the layers in a different order? What does the appearance suggest about how ggplot scales multiple layers?
+
+
+**q-q-Plots**
+We can also produce q-q plots with a continuous variable to see how well distributions match. You can specify which distribution to test against, but the default is normal. One difference with the `geom_qq()` function is that it requires a different aesthetic mapping than we saw before - instead of `x` we need to specify a `sample` mapping.
+
+```{r}
+ggplot(tanager_color,aes(sample=avg_brill)) + geom_qq()
+```
+
+**Bar plots (discrete variables)**
+With a discrete variable, we might want to use a barplot to explore the distribution of our data.
+
+```{r}
+g <- ggplot(tanager_color, aes(habitat))
+g + geom_bar()
+```
+
+## 2-D geoms
+As we saw above with the **scatterplot**, we can use `x` and `y` mappings to plot two variables against each other.
+
+When those two variables are continuous, we have a few other plot options in addition to a **scatterplot**. Notice that we can also add log-scaling to our basic aesthetic if that is required to visualize the relationship between our variables.
+
+```{r}
+bv <- ggplot(tanager_color, aes(avg_brill, log(volume)))
+
+bv + geom_point()
+
+```
+
+**Rug plot**
+```{r}
+bv + geom_rug()
+```
+
+**Smoothed line**
+```{r}
+bv + geom_smooth()
+```
+
+**Continuous bivariate distributions**
+
+Sometimes if you have a lot of data, you run a risk of overplotting if you plot all points at once. There are a few ways to solve this issue. One would be to make your points partially transparent, and we will learn how to do that later in the workshop. Another way would be to plot the distribution of points. We can do that with `geom_bin2d` (heatmap of 2d bin counts), or `geom_density2d` (2d density plot).
+
+```{r}
+bv + geom_bin2d()
+
+bv + geom_density2d()
+
+```
+
+**Boxplot**
+If you have a discrete x variable and continuous y variable, it might make sense to use boxplots or violinplots to compare distributions of points. 
+
+```{r}
+sv <- ggplot(tanager_color,aes(sex,log(volume)))
+
+sv + geom_boxplot()
+```
+
+**Violin Plot**
+A violin plot is similar plot, but shows the entire distribution of points (think a desnity plot turned on its side and mirrored)
+
+```{r}
+sv + geom_violin()
+```
+
+
+**Line Functions**
+Sometimes we have data that are best visualized by a line, such as time series data. To visualize this, we will use the built in `economics` dataset, and use `geom_area` (shade area below line) and `geom_line`(draw a straight line connecting points).
+
+```{r}
+l <- ggplot(economics, aes(date,pop))
+
+l + geom_area()
+l + geom_line()
+```
+
+If you want to draw a line without basing it off of data, you can do with `geom_abline` (specify intercept and slope), `geom_hline` (will be a horizontal line, and you specify the y intercept), or `geom_vline` (will be a vertical line, and you specify the x intercept).
+
+As an example, let's spread the male and female measurements for avg_span so that we can plot them against each other. If males and females are equal, we would expect them to fall on a y=x line. Do you observe that trend?
+
+```{r}
+tcol_span_spread <- tanager_color %>% select(species:foraging_stratum,avg_span) %>% spread(sex,avg_span)
+
+ggplot(tcol_span_spread,aes(Male,Female)) +
+  geom_point() +
+  geom_abline(aes(intercept=0,slope=1))
+```
+
+###Exercises
+>1. Produce a smoothed plot of avg_span (x) by avg_brill (y). However, use a linear model to estimate the smoothing. Try both with and without standard error. Try adding a scatterplot layer.
+>
+>2. Compare log(volume) among different subfamilies. What type of plotting do you think is most informative?
+>
+>3. Plot male versus female avg_brill (hint: you will need to create a new object spread by avg_brill). Add a y=x line. How might you also visualize the distribution of data on the same plot using the geoms we have already explored?
+
+
+## Grouping
+In some situations, it might make sense to compare data among different groups of points. Using *group*, it is possible to apply geoms that summarize (e.g. `geom_smooth`) to groups of points. This can give a general idea of how trends might vary.
+
+```{r}
+ggplot(tcol_span_spread,aes(Male,Female,group=subfamily)) +
+  geom_point() +
+  geom_abline() + 
+  geom_smooth(method="lm",se=FALSE)
+```
+
+In order to actually identify which groups of points belong to what, it is necessary to use *col* instead of *group*. Col will group by default.
+
+```{r}
+ggplot(tcol_span_spread,aes(Male,Female,col=subfamily)) +
+  geom_point() +
+  geom_abline() + 
+  geom_smooth(method="lm",se=FALSE)
+```
+
+*Fill* can be used to specify fill colors for objects like boxplots.
+
+```{r}
+ggplot(tanager_color,aes(foraging_stratum,avg_brill,fill=habitat)) +
+  geom_boxplot()
+```
+
+However, if the *fill* object is not hierarchical, it will actually produce side-by-side plots of the *fill* categories as well
+```{r}
+ggplot(tanager_color,aes(foraging_stratum,avg_brill,fill=sex)) +
+  geom_boxplot()
+```
+
+Note that you do not have to put the *group*, *col*, or *fill* variable in the original `aes` map, but can put it for individual graph components to build summary statistics.
+
+```{r}
+ggplot(tcol_span_spread,aes(Male,Female)) +
+  geom_point(aes(col=foraging_stratum)) +
+  geom_smooth(aes(col=habitat),method="lm",se = FALSE)
+```
+
+
+# Statistical transformations (Stats)
+
+You can summarize data using statistical transformations, or **stats**. Without realizing it, we actually have already bee using **stat** functions to build our plots. This is because the summary **geoms** (e.g. `geom_boxplot`), uses these functions natively (e.g. `stat_boxplot`). 
+
+The **stat** functions behind the various **geoms** that summarize data are useful to know about, as they will provide more detail and information in the documentation. However, there are some **stats** that are separate from the basic **geom** functions we have been learning so far. For example
+
+- `stat_function` = computes y values from a function of x values.
+- `stat_unique` = removes duplicate rows
+- `stat_summary` = summarises y values at distinct x values
+
+There are two ways to use the **stat** functions.
+
+1. Add a `stat_()` function and override the default *geom*.
+
+```{r}
+subfam_span <- ggplot(tanager_color,aes(subfamily,avg_span))
+
+subfam_span + geom_point() +
+  stat_summary(geom="point", fun.y= "mean", color = "red", size=4)
+```
+
+2. Add a `geom_()` function and override the default *stat*.
+
+```{r}
+subfam_span + geom_point() +
+  geom_point(stat="summary", color = "red", size=4)
+```
+
+
+##Error
+ggplot2 has several ways to display error, whether you calculated it yourself (and for example have se values), or whether or not you want to use some of the basic stats available within ggplot2.
+
+The default function for `stat_summary` is actually *mean_se*, and will return both mean and standard error calculations.
+
+```{r}
+subfam_span + stat_summary()
+```
+
+There are quite a few options for plotting errorbars in addition to the simple point with a range we saw above.
+
+**Crossbars**
+```{r}
+subfam_span + stat_summary(geom="crossbar")
+```
+
+**Errorbars**
+```{r}
+subfam_span + stat_summary(geom="errorbar")
+```
+
+**Linerange**
+```{r}
+subfam_span + stat_summary(geom="linerange")
+```
+
+Finally, you can actually give it any functions you would like, by specifying `fun.y`, `fun.ymin`, and `fun.ymax`. For example, if you want to show mean +- sd:
+
+```{r}
+subfam_span +
+  stat_summary(fun.y = mean,
+               fun.ymin = function(x) mean(x) - sd(x),
+               fun.ymax = function(x) mean(x) + sd(x),
+               geom = "pointrange")
+```
+
+
+###Exercies:
+>1. Plot average brilliance (avg_brill) by foraging stratum. Set the initial ggplot function of data and aesthetic mapping to an object called brill_fs. Make sure to include col=foraging_stratum in the inital aesthetic map. Plot by adding a boxplot layer, and fill each boxplot by overall habitat.
+>
+>2. Now, use your brilL_fs plot, but instead show the mean and standard error for each category. Show the mean and standard error via crossbar.
+>
+>3. Try adding black points to the above plot.
+
+Answers:
+```{r}
+#1
+brill_fs <- ggplot(tanager_color, aes(foraging_stratum,avg_brill,col=foraging_stratum))
+brill_fs + geom_boxplot(aes(fill=habitat))
+#2
+brill_fs + stat_summary(geom = "crossbar")
+#3
+brill_fs + stat_summary(geom = "crossbar") +
+  geom_point(col="black")
+```
+
+# Plot Appearances
+## Scales
+
+Scales are essential parts of how ggplot2 functions, and are always present whether or not you are aware of them. Scales take your data and map them to aesthetics. They give control over how the mapping works (e.g. size, color, position), axes and legends. 
+
+Scales are named according to:
+1. `scale_`
+2. axis (e.g. `x_` or `color_`)
+3. variable type (e.g. `continuous` or `discrete`)
+
+So, when we plot:
+`ggplot(tanager_color,aes(foraging_stratum,avg_brill,col=habitat)) + geom_point()`
+
+We are actually plotting:
+`ggplot(tanager_color,aes(foraging_stratum,avg_brill,col=habitat)) + geom_point() +
+scale_x_discrete() +
+scale_y_continuous() +
+scale_color_discrete()`
+
+You can actually change attributes of the scale by specifying the name of the scale. You can even add mathmatical equations by using the `quote()` function. Other attributes like data transformations can be added as well. 
+```{r}
+brill_fs_hab <- ggplot(tanager_color,aes(foraging_stratum,avg_brill,col=habitat))
+brill_fs_hab + geom_point() +
+  scale_x_discrete(name="foraging stratum") +
+  scale_y_continuous(name="average brilliance",trans="log10") +
+  scale_color_discrete(name="Hab")
+
+brill_fs_hab + geom_point() +
+  scale_x_discrete(name="foraging stratum") +
+  scale_y_continuous(name=quote(math-something^2),trans="log10")
+```
+
+As this is the most common attribute to change, ggplot2 helpfully also has implemented xlab(), ylab() and labs() functions as well to simplify changing axis names.
+
+```{r}
+brill_fs_hab + geom_point() +
+  xlab("foraging stratum") +
+  ylab("average brilliance") +
+  labs(title="Great title!", subtitle="Awesome subtitle!")
+```
+
+Another visual attirbute you can update are the names and values of the tick marks. The *breaks* attribute specifies where the tick marks should appear, and the *labels* attribute specifies what they should be called. You can also rename values in a discrete scale with the *labels* attribute. The minor breaks can be set by the *minor_breaks* attribute.
+
+```{r}
+brill_fs_hab + geom_point() +
+  scale_y_continuous(breaks=seq(0.05,0.35,by = 0.05),minor_breaks=NULL) +
+  scale_x_discrete(labels= c("-"="missing", "C"="canopy", "N"="open", "U"="understory", "U/C"="understory/canopy"))
+
+```
+
+## Legends
+
+The term for legends in ggplot2 is **guide**. Another nice improvement of ggplot2 over base R graphics is that guides are automatically generated for you based on aesthetic mappings. If you have ever tried to create legends in base R, you know that you have to specify all aspects by hand, and this can much more easily lead to errors.
+
+You will notice that the guide will draw symbols from multiple layers if necessary, and the symbol will correspond to the layer type and appearance. Points will appear as points, lines as lines, and fill color as a colored rectangle.
+
+```{r}
+brill_fs_hab + geom_point(size=4,pch=8) +
+  geom_point(aes(col=foraging_stratum), size=1)
+```
+
+If you don't want a layer to appear in a legend, you can add `show.legend = FALSE` and it will not be added.
+
+```{r}
+brill_fs_hab + geom_point(show.legend=FALSE)
+```
+
+It is possible to change the position and orientation of the guide within the **theme** setting (more on this later). Within the `theme()` call, you simply set `legend.position` equal to right, left, bottom, or none. You can also control if the keys are laid out horizontally or vertically with `legend.direction` equals vertical or horizontal.
+
+```{r}
+brill_fs_hab + geom_point() +
+  scale_color_discrete(labels=c("-"="missing","F"="forest","N"="open"))+
+  theme(legend.position = "bottom", legend.direction = "horizontal")
+
+```
+
+Sometimes you don't want the legend to exactly reflect what is currently in a plot. For example, if you use transparency in your color (we will learn more about this below!), you might want the legend to reflect the color without transparency. You can override this parameter in the `guides()` function, which is kind of like `labs()`. Alternatively, in the scale call, you can change inputs in with the `guide=guide_legend()` (for continuous or discrete characters) or `guide=guide_colorbar()` (continuous color gradients)
+
+```{r}
+brill_fs_hab + geom_point(alpha = 0.2)
+
+brill_fs_hab + geom_point(alpha = 0.2) +
+  guides(color=guide_legend(override.aes = list(alpha=1)))
+```
+
+###Exercises:
+>1. Change the labels in the legend for the brill_fs_hab plot to missing, forest and open. Try changing the legend.position to a numeric vector of length 2 (c(0,1)), where the two numbers vary from 0 to 1. Use these numbers to position the legend in a place that is not overlapping any points.**Hint, you will change the legend.position within theme
+>
+>2. On the same plot, Look up the help for guide_legend() and change the title of the legend, reverse the order of the legend elements. **Hint, you will change guide_legend() within scale_color_discrete
+
+Answers:
+```{r}
+#1
+brill_fs_hab + geom_point() +
+  scale_color_discrete(labels=c("-"="missing","F"="forest","N"="open"))+
+  theme(legend.position = c(0.75,0.8))
+#2
+brill_fs_hab + geom_point() +
+  scale_color_discrete(labels=c("-"="missing","F"="forest","N"="open"),guide=guide_legend(title="test",reverse=TRUE))+
+  theme(legend.position = c(0.75,0.8))
+```
+
+### Colors and shapes
+
+#### Continuous
+
+Generally visualizing continuous colors can be performed with a color gradient. 
+
+It is possible to change these gradient values with the `scale_` function.
+
+```{r}
+span_vol <- ggplot(tanager_color,aes(log(avg_span),log(volume)))
+span_vol + geom_bin2d()
+
+span_vol + geom_bin2d() +
+  scale_fill_gradient(low="white",high="black")
+```
+
+It is possible to set a 3 color gradient (e.g. for differences in gene expression, negative, neutral, positive) with 'scale_fill_gradient2'. With our dataset, we will artificially set a midpoint just for visualization purposes. You also can use `scale_fill_gradientn` to create a custom gradient with as many different colors as you want. Here we will use a few color vectors that already exist in R, but you can input any custom set of colors.
+
+```{r}
+span_vol + geom_bin2d() +
+  scale_fill_gradientn(colors = terrain.colors(10))
+
+span_vol + geom_bin2d() +
+  scale_fill_gradientn(colors = rainbow(10))
+```
+
+Keep in mind that you can also choose the color for missing data in these gradients with the `na.value` argument. By default this is set to grey.
+
+#### Discrete
+
+However, ggplot2 has built in all of the color palettes from "ColorBrewer" (<http://colorbrewer2.org>), which can be a great option to choose. You can choose this with `scale_color_brewer` or `scale_fill_brewer`, and set the name of the color palette with the *palette* argument. The *direction* argument can be used to change the order of the colors.
+
+```{r}
+g + geom_bar(aes(fill=habitat)) + scale_fill_brewer(palette="Set1")
+g + geom_bar(aes(fill=habitat)) + scale_fill_brewer(palette="Set1",direction=-1)
+```
+
+To find all of the possible color brewer palettes, you can display with the RColorBrewer package.
+
+```{r}
+library(RColorBrewer)
+
+display.brewer.all()
+```
+
+If you are looking for a greyscale, you can use `scale_color_grey()`, which maps discrete data from light to dark. To change the direction, or where you start on the scale, you can specify *start* and *end*.
+
+```{r}
+g + geom_bar(aes(fill=habitat)) + scale_fill_grey()
+g + geom_bar(aes(fill=habitat)) + scale_fill_grey(start=0,end=0.75)
+g + geom_bar(aes(fill=habitat)) + scale_fill_grey(start=1,end=0)
+```
+
+
+If you have your own color palettes, you can use `scale_color_manual()`. This can be very useful if you want to set specific colors for specific classes of data (e.g. to be consistent among figures in a paper).
+
+```{r}
+g + geom_bar(aes(fill=habitat)) + scale_fill_manual(
+  values=c("-"="grey","F"="red","N"="blue")
+)
+
+```
+
+Finally, for all types of colors, you can use the **alpha** option to change the transparency of a color. This can be advantageous when plotting dense distributions of points, or overlaying objects (e.g. histograms).
+
+```{r}
+ggplot(tanager_color,aes(avg_span,fill=sex, color=sex)) +
+  geom_density(alpha=0.2)
+```
+
+####Exercises:
+>1. Recreate the barplot of foraging strata (using the g object) with a different color palette available in the color brewer.
+>
+>2. For the same plot as above, change the transparency of the fill color, but make sure the legend shows the full color without transparency.
+
+```{r}
+#Answers:
+#1 One possibilities
+g + geom_bar(aes(fill=habitat)) + scale_fill_brewer(palette="Dark2")
+
+#2
+g + geom_bar(aes(fill=habitat),alpha=0.4) +
+  scale_fill_brewer(palette="Dark2") +
+  guides(fill=guide_legend(override.aes = list(alpha=1)))
+```
+
+## Positioning
+
+By changing the basic positioning of aspects of the data, it is possible to create very different plots. Here, we will use barplots to demonstrate:
+
+```{r}
+ggplot(tanager_color,aes(habitat,fill=sex)) +
+  geom_bar()
+
+ggplot(tanager_color,aes(habitat,fill=sex)) +
+  geom_bar(position="dodge")
+
+ggplot(tanager_color,aes(habitat,fill=sex)) +
+  geom_bar(position="fill")
+```
+
+You can also use position elements on other types of geoms, such as points. When you have many overlapping points for example, it can be useful to use `position=jitter` to add random noise to each x and y value.
+
+```{r}
+brill_fs_hab + geom_point()
+
+brill_fs_hab + geom_point(position="jitter")
+```
+
+###Coordinate System
+The default coordinate system used by ggplot2 is a cartesian coordinates, where x and y combine to produce a position on the plot.
+
+It is possible to change the coordinates, either in a linear or non-linear fashion.
+
+In a linear fashion, you can use the `coord_cartesian` function to change the limits of your plot (essentially zooming in). This can be advantageous because the data outside the limits are not just thrown away as we saw with setting axis limits in the scale functions.
+
+```{r}
+brill_fs_hab + geom_point(alpha=0.2) +
+  stat_summary(col="black")
+
+brill_fs_hab + geom_point(alpha=0.2) +
+  scale_y_continuous(limits=c(0,0.15)) +
+  stat_summary(col="black")
+
+brill_fs_hab + geom_point(alpha=0.2) +
+  coord_cartesian(ylim=c(0,0.15)) +
+  stat_summary(col="black")
+```
+
+
+`coord_fixed` can make sure that the ratio of x to y axes are equal, no matter the shape of the output. This is useful if you want a relationship to remain a certain way, no matter how the plot comes out.
+
+It is also possible to translate linear coordinates into nonlinear ones. For example, it is possible to transform linear coordinates into polar coordinates.
+
+```{r}
+brill_fs_hab + geom_point(alpha=0.2) +
+  coord_polar("y")
+
+brill_fs_hab + geom_point(alpha=0.2) +
+  coord_polar("x")
+
+ggplot(tanager_color,aes(habitat,fill=sex)) +
+  geom_bar() +
+  coord_polar()
+```
+
+Finally, `coord_map` also can quickly turn long and lat data into coordinates for mapping. 
+
+```{r}
+#Cartesian
+ggplot(map_data("world"),aes(long,lat,group=group)) +
+  geom_polygon(fill="white", color="black")
+```
+
+### Faceting
+
+**Facetting** can be the most useful to generate plots of the same variables, but for different subsets of the data.
+
+There are two options, `facet_wrap` and `facet_grid`. `facet_wrap` will wrap all of the variables into a single horizontal line, broken into however many rows you specify.
+
+```{r}
+ggplot(tanager_color,aes(log(volume))) +
+  geom_histogram(aes(fill=subfamily)) +
+  facet_wrap(~subfamily)
+```
+
+`facet_grid` is nice because it can be used to show either one or two variables. You specify via:
+- .~var1 will spread the values of var1 across columns.
+- var1~. will spread the values of var1 across rows.
+- var1~var2 will spread var1 across columns and var2 across rows.
+
+```{r}
+ggplot(tanager_color,aes(log(volume))) +
+  geom_histogram(aes(fill=sex)) +
+  facet_grid(.~sex)
+
+ggplot(tanager_color,aes(log(volume))) +
+  geom_histogram(aes(fill=sex)) +
+  facet_grid(sex~.)
+
+ggplot(tanager_color,aes(log(volume))) +
+  geom_histogram(aes(fill=sex)) +
+  facet_grid(sex~habitat)
+```
+
+You can also combine facetting and groups to learn different things about your data.
+
+```{r}
+tcol_span_spread2 <- tcol_span_spread %>% select(-foraging_stratum)
+
+ggplot(tcol_span_spread,aes(Female,Male)) +
+  geom_point(data=tcol_span_spread2,color="grey") +
+  geom_point(aes(color=foraging_stratum)) +
+  facet_wrap(~foraging_stratum)
+```
+
+## Themes
+
+All non-data related elements of the plot can be controlled by the theme system. 
+
+Theme **elements** specify which non-data element you want to change (e.g. plot.title, axis.ticks.x).
+
+Theme **element functions** describes the visual properties of an element. For example, `element_text` changes textual elements like the plot.title.
+
+There are a number of different built in themes, other than the default, which is `theme_grey()`. Some are:
+
+```{r}
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_bw()
+
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_linedraw()
+
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_dark()
+
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_minimal()
+
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_classic()
+
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_void()
+```
+
+Here is an example of modifying some elements of a theme:
+
+```{r}
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_bw() +
+  theme(
+    panel.grid.major.x=element_blank(),
+    axis.text = element_text(size=14)
+  )
+```
+
+# Saving and exporting plots
+
+To save your plots, there are two options:
+
+1. Use the standard R approach, where you open a graphics device, create plots, and close it.
+
+```{r}
+pdf(file="Testplot.pdf")
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_bw() +
+  theme(
+    panel.grid.major.x=element_blank(),
+    axis.text = element_text(size=14),
+    axis.title = element_text(size=14)
+  )
+dev.off()
+```
+
+2. Use the special `ggsave` fucntion to save a plot after you have created it interactively.
+
+```{r}
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  theme_bw() +
+  theme(
+    panel.grid.major.x=element_blank(),
+    axis.text = element_text(size=14),
+    axis.title = element_text(size=14)
+  )
+ggsave("Testplot2.pdf")
+```
+
+A few options in ggsave that can be hand are to specify the dimensions with the `width` and `height` arguments (default in inches), and that the path extension you use will automatically select the correct graphics device (e.g. .eps, .pdf, .svg, .png, .jpg, .tiff, .bmp).
+
+
+#### Exercises:
+>1. With the above plot, change the x-axis labels to the full names "canopy", "understory", etc. Change the orientation of these labels to diagonal (look up options with ?theme.)
+>
+>2. Create a facet plot of density plots of average chroma by foraging stratum and sex. Make sure to color by sex. Change the x axis label to be "average chroma"
+>
+>3. With the plot above, change the theme to dark, and increase the axis font label size to 16 and make them bold.
+>
+>4. Save as a jpg
+
+Answers
+```{r}
+#1
+brill_fs_hab + geom_boxplot(aes(fill=habitat),alpha=0.2) +
+  scale_x_discrete(labels=c("-"="missing", "C"="canopy", "N"="open", "U"="understory", "U/C"="understory/canopy")) +
+  theme_bw() +
+  theme(
+    panel.grid.major.x=element_blank(),
+    axis.text = element_text(size=14),
+    axis.title = element_text(size=14),
+    axis.text.x = element_text(angle=45,vjust=0.5)
+  )
+
+
+ggplot(tanager_color,aes(avg_chroma)) +
+  geom_density(aes(fill=sex)) +
+  facet_grid(foraging_stratum~sex) +
+  xlab("average chroma") +
+  theme_dark() +
+  theme(text = element_text(size=14),
+        axis.title = element_text(size=16,face="bold"))
+```
+
+
+# ggplot extensions
+
+Many extensions are available for ggplot, and now that you understand the grammar of graphics, you will be well-equipped to implement them. 
+You can find the officially supported extensions here: <http://www.ggplot2-exts.org>, and there are many more, like ggtree or gggene.
+

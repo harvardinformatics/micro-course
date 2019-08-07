@@ -1,0 +1,339 @@
+---
+title: "intermediate_R_part_3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, echo=FALSE}
+library(tidyverse)
+```
+
+
+```{r}
+setwd("~/Dropbox/Workshops/August_2019_Bioinformatics_Shortcourse_Workshops/intro_to_R/")
+tanager_color <- read_csv("data/tanagercolordata.csv")
+```
+## Loops and Conditional Statements
+
+### For Loops
+
+Sometimes you will have a vector, object, or list of objects, where you will want to perform the same series of actions on each member of an object. For this, we can use a `for` loop.
+
+For example, let's create an R object type we have not yet used, a list. A list is similar to a vector, but the objects of a list do not have to be of the same type. For example, let's create three numeric vectors with 5 different numbers in each, and then use the `list()` function to group them into a list.
+
+```{r}
+vec1 <- c(1, 5, 2, 6, 9)
+vec2 <- c(17, 4, 6, 81, 34)
+vec3 <- c(17, 34, 62, 5, 1)
+
+list1 <- list(vec1,vec2,vec3)
+```
+
+If you look at list1, you can see all three vectors, and notice that you can subset them with `[[]]`. For example, to pull the third object in the list, you would use `list1[[3]]`.
+
+```{r}
+list1[[3]]
+```
+
+Now, we are going to use a for loop to iterate through this list and calculate the mean of each list. Everything in between the brackets of the for loop will be performed before moving on to the next item in the list.
+
+```{r}
+for (vec in list1){
+  print(mean(vec))
+}  
+```
+
+Note that this is useful, but sometimes rather than iterating through the objects themselves, it is useful to iterate through a vector of numbers, so you can still access each item, but save the results to a new vector. For example:
+  
+  ```{r}
+#Create a new empty vector
+mean_vec <- vector()
+
+for (i in 1:length(list1)){
+  mean_vec[i] <- mean(list1[[i]])
+}
+
+mean_vec
+```
+
+You see that we use **i** to stand in for the number in the sequence. It is also always better to calculate the numbers to iterate through based on the length of you object, rather than hard coding (e.g. 1:3). That way if you update your object later, you don't have to worry about changing your for loop.
+
+### If Statements
+
+If statements (also known as flow control) are also useful, particularly when working with for loops or writing functions (as you will see below). Similar to the `if_else()` function we used above, we will write a statement where if (something is true) {do everything in the brackets} else {do something else}.
+
+Perhaps it is easier to explain by example. Let's create a vec4 that is 6 elements long to demonstrate, and create a new list containing these four vectors. Let's then pass it to an if else statement that prints one thing if the vector has a length <= 5, and something else otherwise.
+
+```{r}
+vec4 <- c(1, 5, 3, 9, 1, 9, 3)
+
+list2 <- list(vec1,vec2,vec3,vec4)
+
+for (vec in list2){
+  if (length(vec) <= 5){
+    print("This vector is no longer than 5 elements")
+  }
+  else {
+    print("This vector is longer than 5 elements")
+  }
+}
+```
+
+### Loops and Conditional Exercise 1
+
+For our list2, loop through and calculate the maximum value of each vector.
+
+```{r}
+max_val <- vector()
+
+for (i in 1:length(list2)){
+  max_val[i] <- max(list2[[i]])
+}
+```
+
+### Loops and Conditional Exercise 2
+
+Create a combination of loops and if statements that will take list2, and print the mean value to screen only if the maximum value is greater than 20. Otherwise have it print "Maximum value of vector not great enough".
+
+```{r}
+for (i in 1:length(list2)){
+  if (max(list2[[i]]) > 20){
+    print(mean(list2[[i]]))
+  }
+  else {
+    print("Maximum value of vector not great enough")
+  }  
+}
+
+```
+
+
+## Functions
+
+Tidy data is of course extremely useful. But in order to take full advantage of nicely organized data, you will often need to write your own functions to operate on it. 
+
+Simply put, custom functions are easy ways to package your code for reuse. If you find that you are running a specific set of analysis steps on many data subsets, or many files, it is cleaner and easier to maintain if you move the analysis to a set of functions that can be run with input.
+
+It is easy to find the code for the functions you use - just type the name of the functions without parentheses:
+
+```{r}
+ls
+```
+
+To get started writing custom functions, we'll do some very simple things. For example, R has no built in function to calculate the geometric mean of a vector of numbers. We can write one, like this:
+  
+```{r}
+geoMean <- function(x) {
+  prod(x)^(1/length(x))
+}
+
+test_vec = rnorm(100,5,2)
+geoMean(test_vec)
+```
+
+Just like data, we are assigning the funtion to an object, geoMean. We can then call the geoMean function just like built in R functions, e.g. mean(). Note that unlike mean (which has a trim option and an na.rm option), we currently don't have any options besides the required option x, a numeric vector.
+
+### Functions Exercise 1:
+
+Write a simple function to calculate the standard deviation of a vector. It should take one required input, a vector, and return the square root of the variance, which you can compute using the sqrt and var functions. 
+
+Try running it on test_vec, you should get something close to 2
+
+```{r}
+stDev <- function(x) {
+  sqrt(var(x))
+}
+
+stDev(test_vec)
+```
+
+We can add additional options, say to control how missing data is handled. E.g., let's add the removeNA option, with a default of TRUE, to our geoMean function.
+
+```{r}
+geoMean <- function(x, removeNA=TRUE) {
+  if (removeNA) {
+    y=x[!is.na(x)]
+    prod(y)^(1/length(y))
+  } else {
+    prod(x)^(1/length(x))
+  }
+}
+
+test_vec2 = c(test_vec,NA)
+geoMean(test_vec)
+geoMean(test_vec2)
+geoMean(test_vec2, removeNA=FALSE)
+```
+
+### Functions Exercise 2
+Rewrite your stDev() function to include a removeNA option with the default being FALSE
+
+Note that we use if {} else {} for flow control here. Flow control options like this are rarely useful in R outside of functions, but can be quite useful inside them, especially to make options work.
+
+You can also nest functions. A function created instead another function will be available in the function, but not outside the function. 
+
+```{r}
+allMeans <- function(x, method="arithmetic", removeNA=TRUE) {
+  harmMean <- function(x, removeNA=TRUE) {
+    if (removeNA) {
+      y=x[!is.na(x)]
+      length(y)/sum(1/y)
+    } else {
+      length(x)/sum(1/x)
+    }
+  }
+  
+  means<-list()
+  means[['arithmetic']] = mean(x, na.rm=removeNA)
+  means[['harmonic']] = harmMean(x, removeNA=removeNA)
+  means[['geometic']] = geoMean(x, removeNA=removeNA)
+  
+  if ("all" %in% c(method)) {
+    return(means)
+  }
+  else {
+    return(means[method])
+  }
+}
+```
+
+We can't use harmMean without going through allMeans. Try it, you'll get an error.
+
+
+```{r}
+allMeans(test_vec, method="harmonic")
+```
+
+```{r}
+allMeans(test_vec2, method="all", removeNA = FALSE)
+allMeans(test_vec2, method="all", removeNA = TRUE)
+
+```
+
+
+## Functions Exercise 3:
+Write a new function, similar to allMeans, that computes variance, standard deviation, and the coefficient of variation. 
+Step 1: modify your existing standard deviation function to have a option to remove NAs. (Hint: you can use the na.rm option of variance, like we did with mean in allMeans)
+Step 2: write a new function (either inside or outside the main all variance function) to compute the coefficient of variation (cv), which is the standard deviation divided by the mean. 
+Step 3: combine it all together to make an allVar function.
+Step 4: test it on test_vec and test_vec2
+
+```{r, echo = FALSE}
+stDev <- function(x, removeNA=TRUE) {
+  sqrt(var(x, na.rm=removeNA))
+}
+
+coefVar <- function(x, removeNA=TRUE) {
+  stDev(x)/mean(x, na.rm=removeNA)
+}
+
+allVar <- function(x, removeNA=TRUE, method="all") {
+  vars<-list()
+  vars[["cv"]] = coefVar(x, removeNA=removeNA)
+  vars[["var"]] = var(x, na.rm=removeNA)
+  vars[["sd"]] = stDev(x, removeNA=removeNA)
+  
+  if ("all" %in% c(method)) {
+    return(vars)
+  } else {
+    return(vars[method])
+  }
+}
+allVar(test_vec, method="all", removeNA=FALSE)
+allVar(test_vec2, method="all", removeNA=FALSE)
+```
+
+This, of course, just scratches the surface of where the combination of tidy data and turning your analysis into functions can go. As a final example, let's make a custom function that will take a classification variable, a numeric variable, and a number of permutations, and compute a p-value by permutation (this is not very sophisticated, so don't use this in production code, it is just an example). We'll use the flights data as a model.
+
+```{r}
+permutation_p <- function(DF, value, key, test_elem, alpha=0.05, nperm=100) {
+  #good idea to make a comment that reminds you what each argument does
+  #DF = data frame to operate on
+  #value = column of data frame that is the numeric value to test
+  #key = column of data frame containing categorical variable
+  #test_elem = element we want to compare to others to as whether it is greater or less than
+  #alpha = p-value cutoff to compute; we'll report if the test is significant at this threshold
+#nperm = # of permutations
+
+#function to compute means
+meandiff_perm <- function(v1,v2) {
+  v2<-sample(v2)
+  mean(v1[v2], na.rm=TRUE) - mean(v1[!v2], na.rm=TRUE)
+}
+
+repeat_meandiff<-function(n, v1, v2) {
+  replicate(n, meandiff_perm(v1=v1, v2=v2))
+}
+
+v1<-unlist(DF[value])
+v2<-unlist(DF[key]==test_elem)
+realtest = mean(v1[v2], na.rm=TRUE) - mean(v1[!v2], na.rm=TRUE)
+perm_res<-repeat_meandiff(nperm, v1=v1, v2=v2)
+dir = sign(realtest)
+sig = mean(abs(realtest) < abs(perm_res))
+if(sig <= alpha) {
+  if(dir < 0) {
+    return("down")
+  } else {
+    return("up")
+  } 
+} else {
+  return("ns")
+}
+}
+
+tanager_color2 <- tanager_color %>%
+  filter(!is.na(volume))
+
+permutation_p(DF=tanager_color2, value ="volume", key="sex", test_elem ="Male", nperm=100)
+```
+
+It isn't fast, but you can hopefully see how elaborate this can get. Now we can do something like run this test across different subfamlies wtih group_by.
+
+```{r}
+tanager_color %>%
+  filter(!is.na(volume)) %>%
+  group_by(subfamily) %>% 
+  summarize(male_volume_diff = permutation_p(., "volume", "sex", "Male", nperm=100))
+```
+
+## R Scripts
+Today we have been workign within an R script. These are crucial to use when working in R, because it is documentation of the analyses you ran. When you are working on this project later, you can go back and replicate your analyses, tweak them, or share this with others to reproduce your work. 
+
+Sometimes, it is also useful to create R scripts with a set of tasks you want to automate. If you save these tasks in a script, you can either put them on Odyssey to run on the cluster, or execute everything in them. Let's create a new quick script as an example.
+
+Create a new "test_script.R" with the following:
+setwd("/Users/ashultz/Informatics/Workshops/June_2018_R_Combo_Workshops")
+library(tidyverse)
+bus<-read_delim(file="mbta_bus.tsv", delim="\t")
+pdf("test_plot2.pdf")
+ggplot(bus,aes(ridership,pax.per.trip)) +
+  geom_point()
+dev.off()
+
+Save that script, and now you can run it by typing:
+  
+  ```{r}
+#source("test_script.R")
+```
+
+### Exercise: write a script to generate a plot of the tanager data from scratch
+
+> 0. decide what you want to plot. Anything you want, but has to include at least one column not in the default tanager color dataset or a subset of the default tanager color dataset
+> 1. load in the data
+> 2. make required modifications
+> 2b. change the working directory to a new directory that will have the output (has to already exist on your computer)
+> 3. open a pdf device to a file
+> 4. make your plot
+> 5. close pdf device with dev.off()
+
+To really test your script, you can clear your workspace before running!
+  
+  ```{r}
+#rm(list= ls())
+```
