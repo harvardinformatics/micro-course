@@ -285,3 +285,22 @@ bird_genes_pvals %>%
   chisq.test
 ```
 
+##Statistics Exercises
+##Exercise 1
+Is there a difference between genes that were significant according to the m2vsm2a PAML model and Omega values (Omega_m2)? Try this both parametrically and non-parametrically
+```{r, echo=T}
+bird_genes_pvals %>%
+  t.test(data=.,Omega_m2 ~ sig_paml)
+
+bird_genes_pvals %>%
+  wilcox.test(data=.,prop_sel_branches ~ sig_paml)
+```
+
+##Exercise 2
+Is there a difference between the proportion of genes under selection between the m1vsm2 and m2vsm2a models?
+```{r,echo=T}
+bird_genes_pvals %>%
+  mutate(sig_m1m2=if_else(FDRPval_m1m2<0.05,TRUE,FALSE)) %>%
+  with(.,table(sig_paml,sig_m1m2)) %>%
+  chisq.test
+```
