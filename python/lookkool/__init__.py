@@ -1,1 +1,1 @@
-from lookkool import *
+from .lookkool import *

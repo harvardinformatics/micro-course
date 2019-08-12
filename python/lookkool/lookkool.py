@@ -14,7 +14,6 @@ from ctypes import c_char_p, c_int, cdll, pointer
 import os 
 
 libpath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'liblookkool.so')
-print libpath
 lookkool = cdll.LoadLibrary(libpath)
 
 
