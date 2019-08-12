@@ -1,5 +1,4 @@
 .ipynb*
 .vscode*
-python/minimap2
 python/data/chr12/chr12.fa
 *.pyc
