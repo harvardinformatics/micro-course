@@ -29,7 +29,7 @@ def annotateStartStopCodons(seqid, contig):
 
     annotations = []
     if contig is not None and len(contig) > 3:
-        for i in xrange(0,len(contig) - 2):
+        for i in range(0,len(contig) - 2):
             start = i
             end = i + 3
             if contig[start:end] in stops:

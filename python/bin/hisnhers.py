@@ -63,7 +63,7 @@ def main():
     # Write out sequences in fasta format
     (path,ext) = os.path.splitext(fqfilename)
     fafilename = path + '.fa'
-    print 'Writing to %s' % fafilename
+    print('Writing to %s' % fafilename)
     with open(fafilename,'w') as f:
         for seqdata in seqs:
             f.write('>%s\n%s\n' % (seqdata[0],seqdata[1]))
@@ -73,7 +73,7 @@ def main():
     contigfilename = '%s.contigs' % fafilename
     
     cmd = 'megaAssembler {inputfile} {outputfile}'.format(inputfile=fafilename,outputfile=contigfilename)
-    print 'Running %s' % cmd
+    print('Running %s' % cmd)
     os.system('%s > /dev/null 2> /dev/null'  % cmd)
 
     # Create an array of contig data 
@@ -103,7 +103,7 @@ def main():
         annotations += annotateStartStopCodons(seqid, contig)
         annotations += annotatePalindromes(seqid, contig)
     endtime = time.time()
-    print 'Elapsed serial annotation time %d seconds' % int(endtime - starttime)
+    print('Elapsed serial annotation time %d seconds' % int(endtime - starttime))
 
     # Make a dictionary keyed by contig name
     annotatedcontigs = {}
