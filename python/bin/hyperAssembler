@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Read a fasta file and concatenate all of the sequences into a single contig.
+
+if [[ -z "$@" ]]; then
+    echo 'You must supply a fasta file (e.g. hyperAssembler human.fastq)'
+    exit 1
+fi
+
+echo "Assembling genome in $1"
+
+echo "Start time: `date +%r`"
+
+export contig=''
+
+while read -r line; do
+    [[ "$line" =~ ^\> ]] || contig="${contig}${line}"
+done < "$1"
+
+
+sleep 5
+
+echo ${#contig}
+half=`expr ${#contig} / 2`
+echo $half
+
+
+echo "Finished assembling $1  Writing contigs into $2."
+echo "> contig1" > "$2"
+echo "$contig" | cut -c-${half} >> "$2"
+half=`expr $half + 1`
+echo "> contig2" >> "$2"
+echo "$contig" | cut -c${half}- >> "$2"
+echo "End time: `date +%r`"
+echo 'Done'
+
