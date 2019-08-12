@@ -2,3 +2,4 @@
 .vscode*
 python/data/chr12/chr12.fa
 *.pyc
+python/minimap2
