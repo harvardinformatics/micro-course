@@ -21,7 +21,7 @@ def findPalindromes(contig):
     '''
     Uses a c library to find palindromes and return the locations
     '''
-
+    contig = contig.encode('utf-8')
     c_contig_len = c_int(len(contig))
     max_locs = 2 * len(contig)
     c_locs_array_len = c_int(max_locs)
