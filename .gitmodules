@@ -4,3 +4,6 @@
 [submodule "popgen/HGDP_PopStruct_Exercise"]
 	path = popgen/HGDP_PopStruct_Exercise
 	url = https://github.com/NovembreLab/HGDP_PopStruct_Exercise.git
+[submodule "scRNA-seq-workshop-Fall-2019"]
+	path = scRNA-seq-workshop-Fall-2019
+	url = https://github.com/crazyhottommy/scRNA-seq-workshop-Fall-2019
