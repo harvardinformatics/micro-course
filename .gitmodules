@@ -1,0 +1,3 @@
+[submodule "popgen/intro_genotype_proportions_workshop"]
+	path = popgen/intro_genotype_proportions_workshop
+	url = https://github.com/NovembreLab/intro_genotype_proportions_workshop.git
