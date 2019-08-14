@@ -1,0 +1,204 @@
+<h1 id="intro-to-unix-iguazu-workshop-2017">Intro to UNIX, Iguazu workshop 2017</h1>
+<h2 id="logging-in-and-the-command-prompt">Logging in and the command prompt</h2>
+<p>Open the Terminal application. You should seem this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">(</span><span class="ex">bifx</span><span class="kw">)</span> [<span class="ex">iguazu</span>: ~]$ </code></pre></div>
+<p>The ~ is shorthand for your home directory. If you move out of your home directory then this will be replaced by the name of the directory you're working in. The region after the $ is where you type your commands. Any output from the command is displayed on your terminal window and when the command completes the command prompt is displayed again ready for the next one. For long-running commands you have the ability to run these in the background and have the command prompt returned to you straight away.</p>
+<h4 id="exercises">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Press the return key at your command line - what happens?</li>
+<li>Type a simple command whoami followed by the return key at your command line. What happens?</li>
+</ol>
+<h2 id="directories">Directories</h2>
+<p>Like Windows and Macs unix filesystems are divided into directories in a hierarchical fashion. Directories are separated by a forward slash (/) and all files hang off a single top-level directory called root (written as /). When you first log in you land in your home directory (/home/iguazu). When you want to use your home directory in a command you can either type in the full path or you can refer to it via the shortcut ~. Note that you can refer to directories either as full paths (e.g., /home/iguazu/data) or as relative paths (relative to current working directory). When using relative paths, you can use .. to indicate next directory up, e.g. if you are in /home/iguazu then .. refers to /home.</p>
+<h3 id="working-directory">Working Directory</h3>
+<p>As you move around the filesystem your working directory will change. Your command prompt will give you the last 'chunk' of your working directory but the pwd (print working directory) command will give you the full path.</p>
+<ol style="list-style-type: decimal">
+<li>Type pwd and see what it tells you.</li>
+</ol>
+<h3 id="directory-navigation">Directory Navigation</h3>
+<p>To move about the filesystem we use the cd (change directory command). It is used as follows:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">cd</span> /home/iguazu/apps
+<span class="bu">cd</span> ~
+<span class="bu">cd</span> ~/data</code></pre></div>
+<h3 id="listing-files">Listing files</h3>
+<p>The command ls (short for list) is used to list files. Let's try it now. To list all the files in a directory, use <code>ls &lt;dirname&gt;</code>:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> R
+<span class="fu">ls</span> ~
+<span class="fu">ls</span> ..
+<span class="fu">ls</span> intro/seq</code></pre></div>
+<p>By default in our terminal directories are colored blue and executable scripts are colored green. We can also use ls options to get more information.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">cd</span> intro
+<span class="fu">ls</span> -F </code></pre></div>
+<p>Now directories have a trailing slash, and executable files have a *. The <code>ls -l</code> command (long list) gives us even more information.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> -l</code></pre></div>
+<p>With no extra options the ls command returns a list of everything. You can return subsets by using partial filenames and wildcards (* = any character length 0 or more). For example:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> -l *.gff3 
+<span class="fu">ls</span> -l chr* </code></pre></div>
+<h4 id="exercises-1">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>list all files that end with the .bed extension</li>
+<li>list all files that start with pog and end with .fa in the seq subdirectory.</li>
+<li>Verify that * can match an empty pattern: do ls AF1*.bed and ls AF1.bed return the same thing?</li>
+<li>Does * match a dot (.) character? Test this using a few patterns.</li>
+</ol>
+<h3 id="other-ls-options.">Other ls options.</h3>
+<h5 id="listing-all-files.">Listing all files.</h5>
+<p>Unix has the concept of hidden files that aren't listed by default; they always start with a dot (.). You can include these in the list output by using the -a option. Try <code>ls -al ~</code> (note you can combine options, so <code>-al</code> instead of <code>-a -l</code>) and see what you see. Compare to <code>ls -l ~</code>. Note that file sizes (in bytes) can be hard to parse, you can add the <code>-h</code> option to get sizes in kbytes, megabytes, etc (k, M, G, T suffix).</p>
+<h5 id="sorting-a-file-list.">Sorting a file list.</h5>
+<p>By default <code>ls -l</code> returns files sorted in alphabetical order. Other sort options include file modification time (<code>ls -lt</code>), extension (<code>ls -lX</code>) and size (<code>ls -lS</code>). You can reverse any sort by adding <code>-r</code>. Try these options and use them to answer the following questions.</p>
+<h4 id="exercises-2">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>What is the largest file in the intro directory? How big is it?</li>
+<li>What is the oldest file in the data/structure directory?</li>
+<li>What is the smallest file in the ~/data/popgen directory? [now also try this with relative paths, e.g. ..]</li>
+<li>Are there any files in the directory one above your current working directory (which should be ~/data/intro)</li>
+</ol>
+<h2 id="tips-and-tricks-1">Tips and Tricks #1</h2>
+<p>There are a number of useful tips and tricks that make moving around the command line easier. I will go over a few here:</p>
+<h5 id="tab-completion.">Tab completion.</h5>
+<p>If you hit tab, bash will try to guess what command or file you are trying to type. Try an example: <code>wh &lt;TAB&gt; &lt;TAB&gt;</code> will give you all the commands that start with 'wh'. This also works for files/directories. Try <code>ls s &lt;TAB&gt;</code>. You don't need to start typing anything, try <code>ls  &lt;TAB&gt; &lt;TAB&gt;</code> (but see what happens if you don't have a space after ls).</p>
+<h5 id="pushd-and-popd.">pushd and popd.</h5>
+<p>If you need to go to a different directory quickly and then back to your current directory, pushd and popd can help. pushd moves you to a new directory while remembering your current directory, and popd moves you back. Try it:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">pushd</span> ~/data/species_tree/BEST
+<span class="bu">pwd</span>
+<span class="bu">popd</span>
+<span class="bu">pwd</span></code></pre></div>
+<h4 id="exercises-3">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use pushd and popd to go to the /home/iguazu/apps/bins directory, use ls to identify the largest file, and use popd to return to your home directory.</li>
+<li>Do the same thing, but using cd and relative paths</li>
+</ol>
+<h2 id="creating-and-viewing-files">Creating and viewing files</h2>
+<p>You can create files either using a text editor or by using redirection, which takes the output of a command and redirects it to a file. The virtual environment you are using has a few text editors installed (under Applications), but it also helps to briefly understand the basic terminal editor, called nano.</p>
+<p>To run nano, just type <code>nano</code> on the command line.</p>
+<h4 id="exercises-4">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Use nano to create a text file in the ~/data/intro directory. Type a few lines of text and then save as <code>iguazu.txt</code>.</li>
+</ol>
+<p>There are several ways to view files when you don't need to edit them. One option <code>cat filename</code> will display all text to the screen (careful with big files). Another option, <code>less filename</code> will allow you to browse files. Try both ways of viewing the iguazu.txt file you just created.</p>
+<p>Less has a number of useful shortcuts.</p>
+<ul>
+<li>SPACE Scroll down half a page</li>
+<li>up/down arrows Scroll up/down 1 line</li>
+<li>q Quit</li>
+<li>h Shows the help page</li>
+<li>ctrl-D Scroll down half a page</li>
+<li>ctrl-U Scroll up half a page</li>
+<li>G Go to end of file</li>
+<li>gg Go to beginning of file</li>
+<li>ctrl-g Show status line at bottom of screen</li>
+<li>10g Go to line 10</li>
+<li>/mystring Goes to the line with the next occurence of mystring</li>
+<li>n Finds the next occurence of the search string</li>
+<li>N Finds the previous occurence of the search string</li>
+<li>&amp;mystring Shows only those lines containing mystring (&amp; followed by return to get out)</li>
+<li>&amp;!mystring Shows only those lines not containing mystring</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">less</span> AF1.bed</code></pre></div>
+<p>You can also use <code>head</code> and <code>tail</code> to view just the first and last bit of a file. The <code>-n</code> option specifies how many lines you want to view, so <code>head -n 10 file</code> will print to screen the first ten lines of file.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">head</span> AF1.bed
+<span class="fu">head</span> -n 10 AF1.bed
+<span class="fu">tail</span> -n 15 AF1.bed</code></pre></div>
+<h3 id="redirection.">Redirection.</h3>
+<p>The <code>&gt;</code> command takes what would normally be printed on screen by a command and instead redirects it to a file. So for example</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> -l ~ <span class="op">&gt;</span> myhomedir.txt
+<span class="fu">cat</span> myhomedir.txt</code></pre></div>
+<p>(Note: technically this redirects <em>standard output</em>. Many programs also write logging or errors to <em>standard error</em>. Although we won't need this today, if you want to write standard error to a file, use 2&gt; filename, and if you want to write both to the same file use &amp;&gt; (you can also use 1&gt; file1 2&gt; file2 to write standard output and standard error to different files).</p>
+<h4 id="exercises-5">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Use less to open the ref_FicAlb1.5_top_level.gff3 file. Go to the end of the file and the beginning of the file, and then the 1000th line. You can also use /<text> to search for text. Search for 'HOX'. Use n and N to navigate among occurrences.</li>
+<li>Use less to open the AF1.bed file. Display only lines containing chr2. Does this get you just chr2? Try adding ^I (crtl-I), search key for tab, after the chr2. Now how does it look?</li>
+<li>Use head to get the first 20 lines of the same file.</li>
+<li>Use tail and redirection to make a new file that is just the last 1000 lines of ref_FicAlb.... (call the new file end_FicAlb.gff3)</li>
+<li>Use tail to display the last 3 lines of all gff3 files in the directory (you can use wildcards with tail). Use head to get the first 3 lines.</li>
+</ol>
+<h2 id="making-directories-copying-files-copying-directories">Making Directories, copying files, copying directories</h2>
+<p>The mkdir command will create a new directory. For example</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> ~/data/intro/mynewdir</code></pre></div>
+<p>If you want to create a directory multiple levels down use the -p option to fill in the middle directories:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">cd</span> mynewdir
+<span class="fu">mkdir</span> -p dir1/dir2/dir3</code></pre></div>
+<p>The cp command (copy) copies files and directories:</p>
+<pre><code>cp ../AF1.bed AF1.copy.bed
+cp ../AF1.bed .
+cp ../AF1.bed dir1</code></pre>
+<p>Can use wildcards:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cp</span> ../*.bed dir1/dir2</code></pre></div>
+<p>To copy directories and their contents, use <code>-r</code></p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">cp</span> dir1/dir2 dir22</code></pre></div>
+<h4 id="exercises-6">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Copy the fasta files (.fa) from ~/data/intro/seq to mynewdir</li>
+<li>Copy mynewdir to mynewdir_copy</li>
+<li>Make a new directory, gffs, under ~/data/intro and copy all gff3 files from ~/data/intro to it</li>
+</ol>
+<h2 id="deleting-files-and-directories">Deleting files and directories</h2>
+<p>To remove a file, use the <code>rm</code> command, like so:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">rm</span> mynewdir/pog.fa<span class="kw">`</span></code></pre></div>
+<p>Be careful! There is no trash, if you rm a file it is gone for good.</p>
+<p>To delete a directory, use</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">rm</span> -r mynewdir_copy</code></pre></div>
+<p>This will act recursively so you can delete a whole directory tree. Be extra careful with this, and especially with wildcards. You can use ls to check what you will delete before proceeding if unsure.</p>
+<h4 id="exercises-7">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>cd to mynewdir and delete dir1 and all its subdirectories</li>
+<li>Delete all files in mynewdir but do not remove the directory itself</li>
+</ol>
+<h2 id="renaming-files-and-directories">Renaming Files and Directories</h2>
+<p>You can rename files and directories using mv (move). This also can move where a file is in the directory tree (which is really just renaming it to have a different full path). Examples:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">ls</span> <span class="op">&gt;</span> filelist.txt
+<span class="fu">mv</span> filelist.txt all_files.txt
+<span class="fu">mv</span> mynewdir mydir2</code></pre></div>
+<h4 id="exercises-8">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Move both files starting with chr_ to the gffs directory</li>
+<li>Change directories to the gffs directory, and use relative notation (..) to move these files up one directory. How would you do the same thing with absolute notation?</li>
+</ol>
+<p>If you want to rename multiple files then you can't just use wild cards. You either have to use a loop or the rename command. An example of the rename command. The rename command takes a pattern to match, a pattern to replace, and a list of files to find. An example is <code>rename .sh .bash *.sh</code> which would rename all .sh files to .bash.</p>
+<h4 id="exercises-9">Exercises:</h4>
+<ol style="list-style-type: decimal">
+<li>Use rename to rename all .fa files in the seq subdirectory to .fasta</li>
+</ol>
+<h2 id="file-manipulation">File manipulation</h2>
+<p>One thing the command line great for is simple (and more complex) file manipulation. We will briefly introduce a few useful commands now to give you a taste of what you can do.</p>
+<p>We will use these commands to prepare a file for the intro to R park of the workshop. Start by navigating to the R subdirectory of the data folder in your home directory. Use ls to get a list of the files, and use the tools we talked about before to take a brief look at some of the files. The one we will be modifying is Misiones-high-counts.txt, which is some data I downloaded from eBird on high counts for each species observed in Misiones province.</p>
+<p>Use less to examine this file. You'll note that most lines start with a number, but a few don't. These are lines that are reporting a sp or are otherwise not identified at the species level. We want to remove these from this file. To do this, we'll use grep. Grep is a tool for searching through files to find particular patterns.</p>
+<p>Here are a few examples to get started:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">grep</span> <span class="st">&#39;Tinamou&#39;</span> Misiones-high-counts.txt
+<span class="fu">grep</span> -i <span class="st">&#39;tinamou&#39;</span> *.txt</code></pre></div>
+<h4 id="exercises-10">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Pick a few more words to search for in Misiones-high-counts.txt. If you need some ideas, look at the file will less.</li>
+</ol>
+<p>We can also use grep to count the number of lines that match.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">grep</span> -c <span class="st">&#39;Tinamou&#39;</span> Misiones-high-counts.txt</code></pre></div>
+<p>Patterns don't have to be words, they can be expressions, and can include spaces. For example: <code>grep 'Tangara seledon' Misiones-high-counts.txt</code></p>
+<p>This can get complicated, but one simple one is a character class, which will match anything within []. So [0-9] matches any digit. The ^ character means &quot;line begins with&quot; and the $ means &quot;line ends with&quot;. So ^[0-9] matches any line that starts with a digit.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">grep</span> <span class="st">&#39;^[0-9]&#39;</span> Misiones-high-counts.txt <span class="op">&gt;</span> Misiones-high-counts-species.txt
+<span class="fu">grep</span> <span class="st">&#39;^[0-9]&#39;</span> Misiones-AllYears.txt <span class="op">&gt;</span> Misiones-AllYears-fixed.txt</code></pre></div>
+<h4 id="exercises-11">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use grep to find all the species in the genus Falco that have been observed in Misiones. This is tricky! Just grep 'Falco' won't work (try it and see if you can figure out why not). What do you need to add?</li>
+<li>Write a grep command that gives you the number of species in a genus of your choice (can be Falco if you have others in mind) observed in Misiones.</li>
+</ol>
+<p>Another useful ccommand is wc which counts things about files. <code>wc -l file</code> counts lines, and <code>wc -w file</code> counts words.</p>
+<h4 id="exercises-12">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Using wc, how many species have been seen in Misiones?</li>
+</ol>
+<h1 id="pipes">Pipes</h1>
+<p>We've talked about file redirection, pipes send output to another program</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">grep</span> <span class="st">&#39;PN&#39;</span> Misions-high-counts-species.txt <span class="kw">|</span> <span class="fu">less</span>
+<span class="fu">grep</span> <span class="st">&#39;PN&#39;</span> Misiones-high-counts-species.txt <span class="kw">|</span> <span class="fu">wc</span> -l
+<span class="fu">cut</span> -f4,4 Misiones-high-counts-species.txt <span class="kw">|</span> <span class="fu">sort</span> <span class="kw">|</span> <span class="fu">uniq</span> -c <span class="kw">|</span> <span class="fu">sort</span> -n -r -k1,1 <span class="kw">|</span> <span class="fu">head</span> -n 10</code></pre></div>
+<h4 id="exercises-13">Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>How many files containing the word Misiones are in the data/R directory?</li>
+<li>Write a command that will display <em>ONLY</em> the oldest text (.txt) file in the data/R directory?</li>
+</ol>
+<h2 id="conda">Conda</h2>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">conda</span> -h <span class="co">#help</span>
+<span class="ex">conda</span> create --clone bifx -n stacks
+<span class="bu">source</span> activate stacks
+<span class="ex">conda</span> remove r-base cairo icu 
+<span class="ex">conda</span> upgrade --use-index-cache --offline stacks</code></pre></div>
