@@ -48,7 +48,7 @@ You can see the full set of installed software requirements in a conda `environm
 Go to https://vdi.rc.fas.harvard.edu and open a "interactive app" from the top
 menu and select "Jupyter Lab".
 
-![interactive app2](img/interactive_app2.png)
+![interactive app](img/interactive_app.png)
 
 Wait for a couple minutes for your session to be created then click "Connect to Jupyter".
 
