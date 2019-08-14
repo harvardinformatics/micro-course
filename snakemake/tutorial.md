@@ -8,6 +8,8 @@ No license; the below content is under CC0. (Do with it what you will, and I hop
 
 ### Introduction and thoughts
 
+Hi! I'm Meghan Correa, I a member of the Software Operations team at FAS informatics. I support data analysis for the Bauer core among other things.
+
 Hi! I'm Ming Tang, I am a bioinformatics scientist at FAS informatics. I do a lot of data analysis :).
 
 This ~2 hour workshop is meant to show you how to get started using snakemake.
@@ -66,7 +68,7 @@ mportermahoney@holy7c19212:~$ which conda
 clone this repo into your home dir:
 
 ```
-git clone git@github.com:crazyhottommy/2019-snakemake-Harvard-Informatics-nanocourse.git
+git clone https://github.com/harvardinformatics/micro-course.git
 ```
 
 Navigate to that folder.  Then open the tutorial.md file as a markdown preview. Then in the tab of the markdown file, right click and choose "New View for Markdown File".  This will open the markdown file to the right side and you can close the original.  Now we can see the terminal and markdown side by side.
