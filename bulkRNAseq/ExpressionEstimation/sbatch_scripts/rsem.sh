@@ -4,7 +4,7 @@
 #SBATCH -e rsem_%A.err
 #SBATCH -o rsem_%A.out
 #SBATCH -J rsem
-#SBATCH --mem=36000
+#SBATCH --mem=2000
 #SBATCH -t 06:00:00
 
 module purge
