@@ -208,13 +208,7 @@ so <- sleuth_lrt(so, 'population', 'full')
 ```{r,echo=TRUE}
 sleuth_table_genes_level <- sleuth_results(so, 'population:full', 'lrt', show_all = FALSE)
 ```
-33. Add gene symbols to results table
-```{r,echo=TRUE}
-gene_and_symbol<-as.data.frame(cbind(t2g$ens_gene,t2g$ext_gene))
-colnames(gene_and_symbol)<-c("target_id","ext_gene")
-gene_and_symbol<-dplyr::distinct(gene_and_symbol,target_id,.keep_all=TRUE)
-sleuth_table_genes_level<-left_join(sleuth_table_genes_level,gene_and_symbol)
-```
+
 and look at the results:
 ```{r,echo=TRUE}
 head(sleuth_table_genes_level)
@@ -227,7 +221,7 @@ Note that we can use the same s2c table to relate conditions to sample IDs. We c
 
 1. Open RSEM matrix
 ```{r,echo=TRUE}
-rsem_gene_data<-read.table("dme_elevgrad_rsem_bt2_gene_counts.matrix",header=TRUE,row.names=1)
+rsem_gene_data<-read.table("expression_data/dme_elevgrad_rsem_bt2_gene_counts.matrix",header=TRUE,row.names=1)
 ```
 ## Pre-processing and filtering
 RSEM usem a generative model of RNA-seq and Expectation-Maximization to generate "expected counts" in a way that also uses multi-mapping reads, and their associated mapping uncertainty with, e.g. if reads map to exons shared between transcripts of a gene. As a result, values will be non-integer but almost all DE tools work with counts. Thus, our first step is to round the marrix.
