@@ -16,5 +16,6 @@ module load rsem/1.2.29-fasrc03
 # $4 = outfile prefix
 # single end mode requires you have an independent estimate of sequenced fragment size mean and sd
 
-rsem-calculate-expression --bowtie2 -p 12 --output-genome-bam --time --paired-end $1 $2 $3 $4 
+rsem-calculate-expression --bowtie2 -p 12 --time --paired-end $1 $2 $3 $4 
 
+# with a reference genome, we can also supply --output-genome-bam so the alignments will be in a format for easy visualization in IGV
