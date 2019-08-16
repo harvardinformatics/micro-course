@@ -8,7 +8,7 @@
 #SBATCH -t 06:00:00
 
 module purge
-module load module load rsem/1.2.29-fasrc03
+module load rsem/1.2.29-fasrc03
 
 # $1 = R1
 # $2 = R2
