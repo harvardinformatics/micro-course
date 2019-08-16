@@ -10,10 +10,10 @@ For file formats, we’ll focus on:
  * sam/bam (the dominant format for storing reference-based alignments of sequence data to a genome)
 
 While some of these (e.g. fasta) are hopefully familiar to you, others may not be. You can find extensive detail about each file format from the following links:
- * fastq [https://en.wikipedia.org/wiki/FASTQ_format]
- * gff [https://useast.ensembl.org/info/website/upload/gff3.html]
- * bed [https://genome.ucsc.edu/FAQ/FAQformat.html#format1]
- * sam/bam [http://www.htslib.org/doc/sam.html]
+ * [fastq](https://en.wikipedia.org/wiki/FASTQ_format)
+ * [gff](https://useast.ensembl.org/info/website/upload/gff3.html)
+ * [bed](https://genome.ucsc.edu/FAQ/FAQformat.html#format1)
+ * [sam/bam](http://www.htslib.org/doc/sam.html)
 
 Setup - Navigating the File System
 ----------
@@ -97,7 +97,7 @@ Run the command:
 seqtk sample -s 42 data/Falb_COL2.1.fastq 1000 > Falb_COL2.1.subsample_seqtk.fastq
 ```
 
-For paired-end data, if we use the same seed for both files, we'll get the same output and our reads will remain paired. 
+For paired-end data, if we use the same seed for both files, we'll get the same output and our reads will remain paired.
 
 Gene models and genome annotations (GFF)
 --------
