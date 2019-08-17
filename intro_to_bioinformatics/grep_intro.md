@@ -20,11 +20,15 @@ grep "d" sample.txt
 
 The above three grep commands will all match the text in the example file and will print the line. However, there are a huge number of arguments that can modify how grep behaves. Here are a few useful examples!
 
-- `grep -v` *inverts*, returning lines that *do not* match the pattern.
 
 `grep -w` matches *entire words*.
 - So in the above example:  
 `grep -w "dog" sample.txt` would match the string, but `grep -w "do" sample.txt` would not.
+
+`grep -i` allows case-insensitive matches
+- In the above example, `grep -i "DOG"` would still match the line
+
+`grep -v` *inverts*, returning lines that *do not* match the pattern.
 
 `grep -o` returns only the matching words, not the entire line.
 
@@ -38,7 +42,42 @@ Print lines before/after a match:
 
 Note: `grep -A` is very useful for pulling out specific lines from a FASTA file...just make sure your FASTA file is single line and not multi-line!
 
-`grep -f pattern_file.txt` matches a list of patterns contained in pattern_file.txt against target file.
+`grep -f pattern.txt` matches a list of patterns contained in pattern.txt against target file.
+- I.e. the command `grep -f patterns.txt file.txt` will match all patterns in patterns.txt against file.txt
+- Pattern file has one pattern per line
+
+
+Remember that we can combine different grep arguments with each other! E.g.:
+
+`grep -w -A 1 "X" dmel-all-chromosome-r6.20.fasta`  
+What will this line do??
+
+`grep -v -f file1.txt file2.txt`  
+How about this line?
+
+There are many other functions of grep! When in doubt, remember you can check the help page using `man grep`...or just by using google :)
+
+### Pattern matching with regular expressions
+Regular expressions, aka "regex", are patterns that describe sets of strings. In other words, they allow you to match complex patterns with grep, not just exact matches. Regex is extremely powerful, but can also get (very) complicated, so we'll just stick to a few basic uses.
+
+Regex has certain meta-characters that are reserved for special uses:
+```
+^: matches pattern at start of string
+$: matches pattern at end of string
+.: matches any character except new lines
+[]: matches any of enclose characters
+[^]: matches any characters *except* ones enclosed (note: is different from ^)
+\: "escapes" meta-characters, allows literal matching
+```
+
+Note that if we want to match any of these special characters literally (e.g. matching a period character "."), we would need to use a "\\" to escape it first:  
+`grep "\." file.txt` will literally match a period.
+
+One example of how regex can come in handy is using the ^ special character to quickly count how many sequences are in a FASTA file, which we would do as follows:
+
+`grep -c "^>" file.fasta`
+
+This command matches lines in the FASTA file that start with a ">" character, i.e. the header lines, and uses the -c argument to count how many matches!
 
 
 ### Practice:
@@ -47,10 +86,18 @@ Note: `grep -A` is very useful for pulling out specific lines from a FASTA file.
 
 `grep -c "^@" Falb_COL2.1.fastq`
 
-- Filter out lines matching unassigned contigs (chrUn) in the file hg19.genome
+- Filter out lines matching unassigned contigs (chrUn) in the file hg19.genome and direct the output to a file.
 
-`grep -v "chrUn" hg19.genome | less`
+`grep -v "chrUn" hg19.genome  > hg19_noUn.genome`
 
-- Use grep to pull out the header line of **only** the 2R chromosome arm from dmel-all-chromosome-r6.20.fasta
+- Use grep to pull out the header line of **only** the 2R chromosome arm from dmel-all-chromosome-r6.20.fasta and direct the output to a file.
 
-- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff
+`grep -w "2R" dmel-all-chromosome-r6.20.fasta > 2R_header.txt`
+
+- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less
+
+```
+nano major_arms.txt  
+grep -w -f major_arms.txt /  
+dmel-all-no-analysis-r6.20.gff | less
+```
