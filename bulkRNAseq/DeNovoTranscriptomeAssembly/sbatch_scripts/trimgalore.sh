@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -n 1 
 #SBATCH -t 05:00:00 #Runtime in minutes
-#SBATCH -p bos-info,shared,serial_requeue 
+#SBATCH -p shared,serial_requeue 
 #SBATCH -e tgalore_ERR1101637_%A.err
 #SBATCH -o tgalore_ERR1101637_%A.out
 #SBATCH --mem=3000 

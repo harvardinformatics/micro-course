@@ -1,5 +1,5 @@
 #!/bin/bash 
-#SBATCH -p bos-info,shared,serial_requeue       # Partition to submit to 
+#SBATCH -p shared,serial_requeue       # Partition to submit to 
 #SBATCH -n 1                   # Number of cores 
 #SBATCH -t 01:00:00               # Runtime in days-hours:minutes 
 #SBATCH --mem 1500              # Memory in MB 
