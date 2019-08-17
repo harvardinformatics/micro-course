@@ -110,3 +110,6 @@ Using awk:<br/>
 - FASTA format: <br/>
 \>ID line<br/>
 ATGCGCGTCAA...<br/>
+
+### Advanced practice!
+- Calculate the average length of genes *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
