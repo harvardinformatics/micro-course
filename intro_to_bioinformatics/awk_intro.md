@@ -14,11 +14,11 @@ awk scripts are organized as:
 
 Meaning that every time that the pattern is true, awk will execute the action in the brackets. By default the pattern matches every line, so the action will be taken every line, e.g. the following command that prints every line:
 
-`awk '{print}' input.txt`
+`awk '{print}' data/hg38.genome`
 
 The two most important patterns are `BEGIN` and `END`, which tell the action to take place before any lines are read and after the last line.
 
- `awk 'BEGIN{sum=0} {sum+=1} END{print sum}'`
+ `awk 'BEGIN{sum=0} {sum+=1} END {print sum}' data/hg38.genome`
 
  The above line sets a variable at the start of the script, adds 1 to it every line, then prints its value at the end.
 
@@ -29,9 +29,9 @@ Input to awk is split into **records** and **fields**.
 - Each record is subdivided into **fields**, i.e. columns, as determined by the field separator (see below)
 
 There are several important built-in variable in awk. The fields (columns) of each record are referred to by `$number`, so the first column would be `$1`, second would be `$2`, etc. `$0` refers to the entire record.<br/>
-So to print the fifth column of each line in the file, we'd use:
+So to print the second column of each line in the file, we'd use:
 
-`awk '{print $5}'`
+`awk '{print $2}' data/hg38.genome`
 
 And if we wanted to print the first, third, and sixth:
 
@@ -43,7 +43,7 @@ Note that the different fields are joined with commas when printing.
 
 We can also print strings using using quotation marks:
 
-`awk '{print "First column:" $1}'`
+`awk '{print "First column:" $1}' data/hg38.genome`
 
 Which for every line of the file will print the text "First column:" followed by the value in the first field.
 
