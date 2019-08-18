@@ -191,7 +191,7 @@ Bed and GFF files also have different fields. A bed file is: seqname, start, end
 Let’s start by exploring a GFF file. Use `less` to look at the human gene annotation GFF stored as: data/Homo_sapiens.GRCh38.91.gff3. You can see there are a bunch of different feature fields. Let's say we wanted a list of just the feature fields. We can use the Unix command `cut` to extract a particular field from a file.
 
 ```
-cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | less
+head -n 1000 data/Homo_sapiens.GRCh38.91.gff3 | cut -s -f 3 | less
 ```
 
 What we really want is actually just the unique values. To do this, we can combine the Unix commands `sort` and `uniq`:
@@ -202,7 +202,7 @@ cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | sort | uniq -c
 
 `uniq` collapses duplicate adjacect lines into a single copy, which is prefixed by a count via the `-c` option.
 The lines are first `sort`ed so each count reflects the the number of occurrences of a line in the entire input.
-    
+
 Finally, let's briefly look at a BED file before moving on to some more advanced Unix tricks that will help us work with these files.
 
 ```

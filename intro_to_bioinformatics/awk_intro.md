@@ -43,7 +43,7 @@ Note that the different fields are joined with commas when printing.
 
 We can also print strings using using quotation marks:
 
-`awk '{print "First column:" $1}'`
+`awk '{print "First column:" $1}' data/hg38.genome`
 
 Which for every line of the file will print the text "First column:" followed by the value in the first field.
 
@@ -92,26 +92,24 @@ Here are some example uses:
 
 `awk 'BEGIN{FS="\t"} {if($4 >= 90) print $0}' file.blast`
 
-- Only print lines of GFF file that match the string "exon" in their third column:
+- Only print lines of VCF file that match the string "chr" in their first column:
 
-`awk 'BEGIN{FS="\t"} {if($3 ~ /exon/) print $0}' file.gff`
+`awk 'BEGIN{FS="\t"} {if($1 ~ /chr/) print $0}' file.vcf`
 
 - Convert from GFF (genome feature file) to BED file
 
-`awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$4,$5}' file.gff > file.bed`
+`awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$3,$4}' file.gff`
 
 ### Practice
 Using awk:<br/>
-- Pull out only the CDS annotations from the GFF file dmel-all-no-analysis-r6.20.gff and output them in BED format
+- Subset a BED file to only include lines between certain coordinates
+- Extract FASTA information from a SAM file
+- Write a command to calculate that average of the third column of a tab-separated list and output it.
 
-- Extract FASTA information from the SAM file Falb_COL2.final.sam
+>Hints:
+- FASTA format: <br/>
+\>ID line<br/>
+ATGCGCGTCAA...<br/>
 
-`awk 'BEGIN{FS="\t"; OFS="\n"} {print ">"$1,$10}' Falb_COL2.final.sam | less`
-
-- Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it
-
-`awk 'BEGIN{FS="\t"; sum=0} {sum+=$5} END{print sum/NR}' Falb_COL2.final.sam `
-
-- Calculate the average length of gene annotations *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
-
-`grep "2L" dmel-genes.bed | awk 'BEGIN{FS="\t"; sum=0} {len=$3-$2; sum=sum+len} END{print sum/NR}'`
+### Advanced practice!
+- Calculate the average length of genes *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
