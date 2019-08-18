@@ -92,24 +92,31 @@ Here are some example uses:
 
 `awk 'BEGIN{FS="\t"} {if($4 >= 90) print $0}' file.blast`
 
-- Only print lines of VCF file that match the string "chr" in their first column:
+- Only print lines of GFF file that match the string "exon" in their third column:
 
-`awk 'BEGIN{FS="\t"} {if($1 ~ /chr/) print $0}' file.vcf`
+`awk 'BEGIN{FS="\t"} {if($3 ~ /exon/) print $0}' dmel-all-no-analysis-r6.20.gff`
 
 - Convert from GFF (genome feature file) to BED file
 
-`awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$3,$4}' file.gff`
+`grep -v '^#' dmel-all-no-analysis-r6.20.gff | awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$4-1,$5}' > dmel-all-no-analysis-r6.20.bed`
+
+Note: remember that BED and GFF files have different coordinate systems, i.e. BED start coordinate is 0 based, half-open, GFF is 1-based inclusive! Also, we are first using grep to skip the header lines in the GFF file.
+
 
 ### Practice
 Using awk:<br/>
-- Subset a BED file to only include lines between certain coordinates
-- Extract FASTA information from a SAM file
-- Write a command to calculate that average of the third column of a tab-separated list and output it.
+- Pull out only the CDS annotations from the GFF file dmel-all-no-analysis-r6.20.gff and output them in BED format
 
->Hints:
-- FASTA format: <br/>
-\>ID line<br/>
-ATGCGCGTCAA...<br/>
+`awk 'BEGIN{FS="\t"; OFS="\t"} {if($3 ~ /CDS/) print $1,$4-1,$5}' dmel-all-no-analysis-r6.20.gff`
 
-### Advanced practice!
-- Calculate the average length of genes *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
+- Extract FASTA information from the SAM file Falb_COL2.final.sam (hint: you will need to remove the header lines first!)
+
+`grep -v '^@' Falb_COL2.final.sam | awk 'BEGIN{FS="\t"; OFS="\n"} {print ">"$1,$10}' | less`
+
+- Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it (hint: as above, need to remove headers)
+
+`grep -v '^@' Falb_COL2.final.sam | awk 'BEGIN{FS="\t"; sum=0} {sum+=$5} END{print sum/NR}'`
+
+- Calculate the average length of gene annotations *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
+
+`grep "2L" dmel-genes.bed | awk 'BEGIN{FS="\t"; sum=0} {len=$3-$2; sum=sum+len} END{print sum/NR}'`
