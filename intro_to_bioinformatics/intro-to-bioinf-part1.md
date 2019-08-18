@@ -3,17 +3,11 @@ Introduction to Bioinformatics
 
 Much of bioinformatics these days involves working with high throughput sequencing data, typically in a UNIX environment. This workshop will give a quick refresher on the UNIX command line, introduce a number of common file formats and how to process them, and along the way give you some more advanced tips and tricks. The goal here is not to exhaustively cover each tool, but rather to show you some ways of solving common problems and along the way hopefully learn some useful shell commands.
 
-For file formats, we’ll focus on:
- * fastq/fasta (the most common way to store sequence data, and what you’ll get back from the core after doing sequencing)
- * gff (the most common format for storing gene models and other complex genome annotations)
- * bed (a flexible format for storing any kind of interval data)
- * sam/bam (the dominant format for storing reference-based alignments of sequence data to a genome)
-
-While some of these (e.g. fasta) are hopefully familiar to you, others may not be. You can find extensive detail about each file format from the following links:
- * [fastq](https://en.wikipedia.org/wiki/FASTQ_format)
- * [gff](https://useast.ensembl.org/info/website/upload/gff3.html)
- * [bed](https://genome.ucsc.edu/FAQ/FAQformat.html#format1)
- * [sam/bam](http://www.htslib.org/doc/sam.html)
+We’ll focus on the following the following file formats (click on the links for extensive details about each file format):
+ * [FASTQ](https://en.wikipedia.org/wiki/FASTQ_format)/[FASTA](https://en.wikipedia.org/wiki/FASTA_format) (the most common ways to store sequence data, and what you’ll get back from the core after doing sequencing)
+ * [GFF (GFF3)](https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md) (the most common format for storing gene models and other complex genome annotations)
+ * [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) (a flexible format for storing any kind of interval data)
+ * [SAM/BAM](https://samtools.github.io/hts-specs/SAMv1.pdf) (the dominant formats for storing reference-based alignments of sequence data to a genome)
 
 In the morning, we'll cover fastq/fasta, gff, and bed files, as well as some useful Unix tricks. In the afternoon, we'll cover read mapping and sam/bam files.
 
@@ -22,13 +16,19 @@ Setup - Navigating the File System
 
 You'll need to copy some data to work with the examples below. We'll use this as an opportunity to quickly review navigating the file system using the command line.
 
-First we want to make a new directory, using the `mkdir` command, to put the data you copy
+First we want to make a new directory, using the `mkdir` command, to put the data you copy:
 
 ```
 mkdir -p intro_bioinf_2019
 ```
 
-A few things to note: first, a general command in UNIX will be a program (`mkdir`) followed by options (`-p`). Options will either start with `-` or `--`, and many programs also have *positional* arguments, e.g. the directory we want to create in this case. We'll see this syntax repeatedly throughout the day.
+A few things to note: first, a general command in UNIX will be a program (`mkdir`) followed by options (`-p`, which means "create this directory/directories, including any parent directories, and don't error if any already exist").
+Options will either start with:
+* `-` (for short/single-letter options, which can be combined; e.g., `mkdir -pv` is equivalent to `mkdir -p -v` ), or
+* `--` (for long/multi-character options; e.g. `mkdir --parents --verbose`)
+
+Many programs also have *positional* arguments (aka operands), e.g. the directory we want to create in this case.
+We'll see this syntax repeatedly throughout the day.
 
 Typing a program with the `-h` or `--help` option and nothing else will usually give you some basic info about it, e.g.:
 
@@ -36,9 +36,11 @@ Typing a program with the `-h` or `--help` option and nothing else will usually 
 mkdir --help
 ```
 
+*NOTE: this will not work on macOS; use the [man pages](https://en.wikipedia.org/wiki/Man_page) instead (e.g., `man mkdir`)*
+
 Now let's copy some data. We want to copy all the files from `/n/holylfs/LABS/informatics/workshops/bionano-gtt-data/` into a new subdirectory (`data`) in the directory we just made.
 
-First we need to make the data subdirectory. We can do this in two ways:
+First we need to make the data subdirectory:
 
 Option 1
 ```
@@ -51,13 +53,16 @@ Option 2
 mkdir intro_bioinf_2019/data
 ```
 
-In the first case, we first move into the directory with `cd` and then use mkdir to make a new directory in the current location.
+In the first case, we first move into the directory with `cd` and then use mkdir to make a new directory in the current working directory.
 
 In the second case, we don't move where we are on the file system, instead we specify path we want to create. Note that this is still *relative* to our current directory. We could do this instead with an *absolute* path, which starts from / (the root of the fileystem). We'll see this in the copy command. **NOTE** you may need to change this command depending on where in the filesystem you are. If you are not sure, use `pwd` to **p** rint **w** orking **d** irectory.
 
+Assuming you executed `mkdir intro_bioinf_2019/data`:
 ```
 cp -v /n/holylfs/LABS/informatics/workshops/bionano-gtt-data/* intro_bioinf_2019/data
 ```
+
+*The ` *` is a shell pattern that matches any filename, while the `-v` option causes `cp` to show which file is currently being copied (otherwise, `cp` is silent until it completes).*
 
 Now, let's change directory (using `cd`) so that we are in the `intro_bioinf_2019` directory (**not** the `data` subdir). Note that just typing `cd` with no arguments will bring you to your home directory, if you are confused about where you are in the file system and need to reset.
 
@@ -88,12 +93,28 @@ Each fastq record is 4 lines long, so to get 1000 of them we need 4000 lines. Us
 head -n 4000 data/Falb_COL2.1.fastq > Falb_COL2.1.subsample_head.fastq
 ```
 
-Now let's use seqtk to actually sample
+To efficiently view (but not edit) this file, we can use the [less](https://en.wikipedia.org/wiki/Less_(Unix)) command:
+```
+less Falb_COL2.1.subsample_head.fastq
+```
+The arrow keys can be used to scroll forward and backward in the file, while `/` can be used to search for a pattern.
+To exit, type `q`.
+
+`less` does not load the entire file into memory before displaying, and can be used to scroll through extremely large files.
+
+Now let's use seqtk to actually sample.
 
 Get the help:
 ```
 seqtk sample
 ```
+> ```
+> Usage:   seqtk sample [-2] [-s seed=11] <in.fa> <frac>|<number>
+>
+> Options: -s INT       RNG seed [11]
+         -2           2-pass mode: twice as slow but with much reduced memory
+> ```
+
 Run the command:
 ```
 seqtk sample -s 42 data/Falb_COL2.1.fastq 1000 > Falb_COL2.1.subsample_seqtk.fastq
@@ -109,6 +130,12 @@ Okay now we want to verify that we actually got 1000 records. For fastq files we
 ```
 wc -l *.fastq
 ```
+> ```
+>  4000 Falb_COL2.1.subsample_head.fastq
+>  4000 Falb_COL2.1.subsample_seqtk.fastq
+>  4000 Falb_COL2.2.subsample_seqtk.fastq
+> 12000 total
+> ```
 
 Another common operation on fasta files is extracting just a subset of a larger files, usually by name. For example, we may want to extract just a chromosome from a whole genome fasta file. There are a bunch of ways to do this; I’ll show you two.
 
@@ -129,7 +156,7 @@ We can also use samtools, which is faster for just one region but inefficient fo
 samtools faidx data/dmel-all-chromosome-r6.20.fasta X > dmel-X.samtools.fa
 ```
 
-Now say we want to get the length of the Y chromosome in the Drosophila assembly; we are going to do this by stringing together three commands with pipes (`|`).
+Now say we want to get the length of the Y chromosome in the Drosophila assembly; we are going to do this by stringing together three commands with pipes, which feeds the *standard output* of the command on the left of the `|` to the *standard input* of the command on the right.
 
 ```
 samtools faidx data/dmel-all-chromosome-r6.20.fasta Y > dmel-Y.samtools.fa
@@ -140,12 +167,15 @@ tail -n +2 dmel-Y.samtools.fa > dmel-Y-seqonly.fa
 ```
 
 ```
-wc -m dmel-Y-seqonly.fa
+wc -c dmel-Y-seqonly.fa
 ```
 
 ```
-samtools faidx data/dmel-all-chromosome-r6.20.fasta Y | tail -n +2 | wc -m
+samtools faidx data/dmel-all-chromosome-r6.20.fasta Y | tail -n +2 | wc -c
 ```
+
+Pipes are a *very* useful optimization when working with large files, they avoid needing to create intermediate files, and the commands in a pipeline execute concurrently.
+Many bioinformatics utilities can read their input from pipes.
 
 Interval and annotations data (BED, GFF)
 --------
@@ -158,10 +188,10 @@ There are a few implications of this. For example, to compute length for a bed i
 
 Bed and GFF files also have different fields. A bed file is: seqname, start, end, name, score, strand, thickStart, thickEnd, itermRgb, blockCount, blockSizes, blockStarts (the last several are display attributes if you load a bed on a genome browser). Only the first three fields are required, but you cannot skip fields (so if you want to include strand, you need to also include name and score in that order). A gff file is: seqname, source, feature, start, end, score, strand, frame, attribute and all fields are required.
 
-Let’s start by exploring a GFF file. Use more to look at the human gene annotation GFF stored as: data/Homo_sapiens.GRCh38.91.gff3. You can see there are a bunch of different feature fields. Let's say we wanted a list of just the feature fields. We can use the Unix command `cut` to extract a particular field from a file.
+Let’s start by exploring a GFF file. Use `less` to look at the human gene annotation GFF stored as: data/Homo_sapiens.GRCh38.91.gff3. You can see there are a bunch of different feature fields. Let's say we wanted a list of just the feature fields. We can use the Unix command `cut` to extract a particular field from a file.
 
 ```
-head -n 1000 data/Homo_sapiens.GRCh38.91.gff3 | cut -s -f 3 | less
+cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | less
 ```
 
 What we really want is actually just the unique values. To do this, we can combine the Unix commands `sort` and `uniq`:
@@ -170,6 +200,9 @@ What we really want is actually just the unique values. To do this, we can combi
 cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | sort | uniq -c
 ```
 
+`uniq` collapses duplicate adjacect lines into a single copy, which is prefixed by a count via the `-c` option.
+The lines are first `sort`ed so each count reflects the the number of occurrences of a line in the entire input.
+    
 Finally, let's briefly look at a BED file before moving on to some more advanced Unix tricks that will help us work with these files.
 
 ```
