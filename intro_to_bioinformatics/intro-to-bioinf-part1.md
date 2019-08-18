@@ -136,7 +136,7 @@ samtools faidx data/dmel-all-chromosome-r6.20.fasta Y > dmel-Y.samtools.fa
 ```
 
 ```
-tail +n 2 dmel-Y.samtools.fa > dmel-Y-seqonly.fa
+tail -n +2 dmel-Y.samtools.fa > dmel-Y-seqonly.fa
 ```
 
 ```
@@ -144,7 +144,7 @@ wc -m dmel-Y-seqonly.fa
 ```
 
 ```
-samtools faidx data/dmel-all-chromosome-r6.20.fasta Y | tail +n 2 | wc -m
+samtools faidx data/dmel-all-chromosome-r6.20.fasta Y | tail -n +2 | wc -m
 ```
 
 Interval and annotations data (BED, GFF)
@@ -161,7 +161,7 @@ Bed and GFF files also have different fields. A bed file is: seqname, start, end
 Let’s start by exploring a GFF file. Use more to look at the human gene annotation GFF stored as: data/Homo_sapiens.GRCh38.91.gff3. You can see there are a bunch of different feature fields. Let's say we wanted a list of just the feature fields. We can use the Unix command `cut` to extract a particular field from a file.
 
 ```
-cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | more
+head -n 1000 data/Homo_sapiens.GRCh38.91.gff3 | cut -s -f 3 | less
 ```
 
 What we really want is actually just the unique values. To do this, we can combine the Unix commands `sort` and `uniq`:
@@ -173,7 +173,7 @@ cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | sort | uniq -c
 Finally, let's briefly look at a BED file before moving on to some more advanced Unix tricks that will help us work with these files.
 
 ```
-more data/dmel-genes.bed
+less data/dmel-genes.bed
 ```
 
 Note the differences with a GFF. As an exercise, let's use the same command we used above, but this time to get all the chromosomes (`-f 1`) in the dmel-genes bed file.
