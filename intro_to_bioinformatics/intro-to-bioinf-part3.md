@@ -16,7 +16,7 @@ You'll see that for many commands, bedtools works by taking a 'query' bed file (
 
 Answer:
 ```
-bedtools closest -a human_enhancers.bed -b ucscGenes.bed | head
+bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed | head
 
 chr1	1015066	1015266	HSE897	9.5706324138	chr1	1017197	1051736	uc001acu.2
 chr1	1590473	1590673	HSE853	17.3206898329	chr1	1571099	1655775	uc001agv.1
@@ -31,17 +31,17 @@ chr1	23244249	23244449	HSE434	17.1331422162	chr1	23243782	23247347	uc001bgg.1
 ```
 **Exercise**: in this case, does bedtools output a bed file? How could we convert this to a proper bed file, where we keep the score but replace the names (HSE####) with the closest gene? (Hint: think about UNIX tools)
 
-Answer: `bedtools closest -a human_enhancers.bed -b ucscGenes.bed | awk -v OFS='\t' '{print $1, $2, $3, $9, $5}' | head`
+Answer: `bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed | awk -v OFS='\t' '{print $1, $2, $3, $9, $5}' | head`
 
 Okay, now let's make a file that contains the closest gene for each of the human-specific enhancers, in proper bed format, but we'll add two additional options (refer back to bedtools closest -h for the full option list): -d to give us the distance to the nearest gene, which we'll put in the 'score' field of the output bed file, and -t "first" means that if there are ties, we'll just keep one (so that we have each enhancer assigned to a single gene).
 
-`bedtools closest -a human_enhancers.bed -b ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $9, $10}' > hse_closest_genes.bed`
+`bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $9, $10}' > hse_closest_genes.bed`
 
 **Exercise**: What do we need to change to get the equivalent set but for the common enhancers?
 
 Answer: The input file name for bed file 'A', the output file name, and the field numbers for the gene and score.
 ```
-bedtools closest -a common_enhancers.bed -b ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $7, $8}' > ce_closest_genes.bed
+bedtools closest -a data/common_enhancers.bed -b data/ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $7, $8}' > ce_closest_genes.bed
 ```
 Finding overlaps between intervals
 -------------
@@ -53,7 +53,7 @@ The tool we'll use is intersect. Let's start by looking at the options: ```bedto
 The output of this can be a bit complicated, so let's start by just looking at a few things:
 
 ```
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed | head -n 3
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed | head -n 3
 
 chr1	1590473	1590673	HSE853	17.3206898329
 chr1	6336418	6336624	HSE394	14.8892086906
@@ -63,13 +63,13 @@ chr1	7404594	7404794	HSE315	24.228051023
 What are we seeing here?
 
 ```
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -wa | head -n 3
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -wa | head -n 3
 
 chr1	1590473	1590673	HSE853	17.3206898329
 chr1	6336418	6336624	HSE394	14.8892086906
 chr1	7404594	7404794	HSE315	24.228051023
 
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -wb | head -n 3
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -wb | head -n 3
 chr1	1590473	1590673	HSE853	17.3206898329	chr1	1590264	1590895	.	1000	.
 chr1	6336418	6336624	HSE394	14.8892086906	chr1	6160044	6490440	.	291	.
 chr1	7404594	7404794	HSE315	24.228051023	chr1	7400919	7412366	.	279	.
@@ -78,12 +78,12 @@ chr1	7404594	7404794	HSE315	24.228051023	chr1	7400919	7412366	.	279	.
 What about now?
 
 ```
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -loj | head -n 3
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -loj | head -n 3
 chr1	1015066	1015266	HSE897	9.5706324138	.	-1	-1	.	-1	.
 chr1	1590473	1590673	HSE853	17.3206898329	chr1	1590264	1590895	.	1000	.
 chr1	2120861	2121064	HSE86	66.0424471614	.	-1	-1	.	-1	.
 
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -wao | head -n 3
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -wao | head -n 3
 chr1	1015066	1015266	HSE897	9.5706324138	.	-1	-1	.	-1	.	0
 chr1	1590473	1590673	HSE853	17.3206898329	chr1	1590264	1590895	.	1000	.	200
 chr1	2120861	2121064	HSE86	66.0424471614	.	-1	-1	.	-1	.	0
@@ -93,17 +93,17 @@ And now?
 
 **Exercise**: What if we wanted to get a new bed file with only the neural crest specific enhancers? That is, we want to filter out anything that overlaps (by even 1 bp) with a H3K27Ac peak in stem cells. Look at the bedtools intersect -h output and see if you can figure out what option to use to do this.
 
-Answer: `bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -v > human_nconly_enhancers.bed`
+Answer: `bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -v > human_nconly_enhancers.bed`
 
 Finally, we might want to generate a file where, for each neural crest enhancer in our list, we get the number of H1-hESC-H3K27Ac peaks it overlaps with. We'll use the `-c` option in bedtools for this. We'll also restrict overlaps to a reciprocal 20% -- so each feature in A has to overlap 25% of B, and vice versa, to count as an overlap.
 
 ```
-bedtools intersect -a human_enhancers.bed -b H1-hESC-H3K27Ac.bed -f 0.20 -r -c > human_overlaps.txt
+bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -f 0.20 -r -c > human_overlaps.txt
 ```
 
 Now let's do the same thing with common enhancers:
 ```
-bedtools intersect -a common_enhancers.bed -b H1-hESC-H3K27Ac.bed -f 0.20 -r -c > common_overlaps.txt
+bedtools intersect -a data/common_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -f 0.20 -r -c > common_overlaps.txt
 ```
 
 Get sequence from a bed file
@@ -149,4 +149,4 @@ bedtools shuffle -incl hg19_intergenic.bed -i data/common_enhancers.bed \
 -noOverlapping -g data/hg19.genome > common_enhancers_random.bed
 ```
 
-We'll end there. After lunch we'll pick up with read mapping and a little bit of information on working with bam and sam files. 
+We'll end there. After lunch we'll pick up with read mapping and a little bit of information on working with bam and sam files.

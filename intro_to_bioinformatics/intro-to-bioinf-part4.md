@@ -22,8 +22,8 @@ mkdir -p 03_vcfs
 This project organization is designed to keep things clean, and also remind you of the order of steps. Now we also need to copy over some data from elsewhere on Odyssey.
 
 ```
-cp /n/holylfs/LABS/informatics/tsackton/workshops/read_mapping_variant_calling/genome/* 00_genome
-cp /n/holylfs/LABS/informatics/tsackton/workshops/read_mapping_variant_calling/01_fastq/raw/* 01_fastqs
+cp /n/holylfs/LABS/informatics/workshops/read_mapping_variant_calling/genome/* 00_genome
+cp /n/holylfs/LABS/informatics/workshops/read_mapping_variant_calling/01_fastq/raw/* 01_fastqs
 ```
 
 Mapping reads to a reference genome
