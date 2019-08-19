@@ -109,7 +109,7 @@ Note that if an action isn't specified, the default action is `{print}`, so the 
 
 `awk 'END{print NR/4}' data/Falb_COL2.1.fastq`
 
-**Note**: this is technically safer than the command we looked at earlier using grep, as yo don't have to worry about accidentally counting the quality line.
+**Note**: this is technically safer than the command we looked at earlier using grep, as you don't have to worry about accidentally counting the quality line.
 
 - Only print annotations on a specific scaffold (chr1) that fall between 1Mb and 2Mb:
 
