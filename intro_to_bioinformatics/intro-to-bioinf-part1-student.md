@@ -66,9 +66,6 @@ cp -v /n/holylfs/LABS/informatics/workshops/bionano-gtt-data/* intro_bioinf_2019
 
 Now, let's change directory (using `cd`) so that we are in the `intro_bioinf_2019` directory (**not** the `data` subdir). Note that just typing `cd` with no arguments will bring you to your home directory, if you are confused about where you are in the file system and need to reset.
 
-```
-cd intro_bioinf_2019
-```
 
 Sequencing data (FASTQ/FASTA)
 --------
@@ -87,10 +84,10 @@ Okay now back to getting the first 1000 lines. We'll see what the head command d
 head data/Falb_COL2.1.fastq
 ```
 
-Each fastq record is 4 lines long, so to get 1000 of them we need 4000 lines. Using the help for head, how do you get head to return first 4000 lines of a file? Remember to use output redirection to save this to a file intead of print to your screen.
+Each fastq record is 4 lines long, so to get 1000 of them we need 4000 lines.
 
 ```
-head -n 4000 data/Falb_COL2.1.fastq > Falb_COL2.1.subsample_head.fastq
+
 ```
 
 To efficiently view (but not edit) this file, we can use the [less](https://en.wikipedia.org/wiki/Less_(Unix)) command:
@@ -116,13 +113,14 @@ seqtk sample
 > ```
 
 Run the command:
+
 ```
 seqtk sample -s 42 data/Falb_COL2.1.fastq 1000 > Falb_COL2.1.subsample_seqtk.fastq
 ```
 
 For paired-end data, if we use the same seed for both files, we'll get the same output and our reads will remain paired:
+
 ```
-seqtk sample -s 42 data/Falb_COL2.2.fastq 1000 > Falb_COL2.2.subsample_seqtk.fastq
 ```
 
 Okay now we want to verify that we actually got 1000 records. For fastq files we can use the fact that a record is (almost always) four lines, and use the `wc` command. If you haven't used this command before, start with `wc --help`.
@@ -144,8 +142,6 @@ Option 1: using seqtk
 To use seqtk, we need to make a file with the name of the sequences we want to extract. This is inefficient for only a few regions, but very useful if we want to get a large number of sequences.
 
 ```
-echo "X" > seqtk.regions
-seqtk subseq data/dmel-all-chromosome-r6.20.fasta seqtk.regions > dmel-X.seqtk.fa
 ```
 
 Option 2: using samtools
@@ -153,25 +149,11 @@ Option 2: using samtools
 We can also use samtools, which is faster for just one region but inefficient for many sequences.
 
 ```
-samtools faidx data/dmel-all-chromosome-r6.20.fasta X > dmel-X.samtools.fa
 ```
 
 Now say we want to get the length of the Y chromosome in the Drosophila assembly; we are going to do this by stringing together three commands with pipes, which feeds the *standard output* of the command on the left of the `|` to the *standard input* of the command on the right.
 
 ```
-samtools faidx data/dmel-all-chromosome-r6.20.fasta Y > dmel-Y.samtools.fa
-```
-
-```
-tail -n +2 dmel-Y.samtools.fa > dmel-Y-seqonly.fa
-```
-
-```
-wc -c dmel-Y-seqonly.fa
-```
-
-```
-samtools faidx data/dmel-all-chromosome-r6.20.fasta Y | tail -n +2 | wc -c
 ```
 
 Pipes are a *very* useful optimization when working with large files, they avoid needing to create intermediate files, and the commands in a pipeline execute concurrently.
@@ -209,10 +191,6 @@ Finally, let's briefly look at a BED file before moving on to some more advanced
 less data/dmel-genes.bed
 ```
 
-Note the differences with a GFF. As an exercise, let's use the same command we used above, but this time to get all the chromosomes (`-f 1`) in the dmel-genes bed file.
-
-```
-cut -f 1 data/dmel-genes.bed | sort | uniq -c
-```
+Note the differences with a GFF. As an exercise, let's use the same command we used above, but this time to get all the chromosomes (first field, so `-f 1`) in the dmel-genes bed file.
 
 This was a very quick introduction. We are going to do more with BED and GFF files, but first we are going to introduce some more complex Unix tools that will help us greatly in working with these kinds of files.
