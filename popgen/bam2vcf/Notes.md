@@ -9,30 +9,18 @@ Preliminary Steps
 	- we will use the text file to take notes and write commands
  	- we will copy these commands into the terminal window
 
-```
-test
-```
-
-'''
-test
-'''
 
 
-# Today we will be talking about calling variants, which include SNPs and indels. Pipelines like the one we'll walk through today need to be used any
-# time you're interested in detecting mutational differences between samples, compared to using sequence reads to calculate relative abundance (e.g.
-# RNAseq differential expression, CHIPseq, ATACseq)
-#
-# For the sake of efficiency we will work in the same environment that previous sessions of this workshop used in which various programs are already
-# installed. This will give us more time to explore the functionality of these programs, but unfortunately skips the step of installing or setting up
-# these programs in the first place, which is obviously an important step if you want to use these pipelines on your own data. So, I've ran this 
-# workflow on the cluster (as opposed to within this virtual environment) and will try to explain how I set up various programs.
-#
-#	NOTE: NOTES ON SETUP
-#	NOTE: Programs for today
-#	NOTE: Modules: samtools, GATK4 (+java8), vcftools
-#	NOTE: on odyssey: Picard 
-#	NOTE: NOT on odyssey: snpEff
-#
+Today we will be talking about calling variants, which include SNPs and indels. Pipelines like the one we'll walk through today need to be used any time you're interested in detecting mutational differences between samples, compared to using sequence reads to calculate relative abundance (e.g. RNAseq differential expression, CHIPseq, ATACseq)
+
+For the sake of efficiency we will work in the same environment that previous sessions of this workshop used in which various programs are already installed. This will give us more time to explore the functionality of these programs, but unfortunately skips the step of installing or setting up these programs in the first place. I've ran this workflow on the cluster (as opposed to within this virtual environment) and will try to explain how I set up various programs.
+
+# NOTES ON SETUP
+## Programs for today
+### Modules: samtools, GATK4 (+java8), vcftools
+### on odyssey: Picard 
+### NOT on odyssey: snpEff
+
 # The first 3 programs are available as modules on odyssey. For instance, if we Google Harvard FAS module, we can search for the commands to 
 # load many of these tools. 
 #
