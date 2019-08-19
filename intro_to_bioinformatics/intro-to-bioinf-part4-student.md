@@ -78,13 +78,6 @@ When you run this, you should get a list of numbers printed to your screen. What
 Now, let’s do this for real:
 
 ```
-for INDEX in 1 2 3 4 5 31 32 33 34 35;
-do
-   bwa mem -M -t 1 -R "@RG\tID:COL_$INDEX\tSM:COL_$INDEX" ../00_genome/ficAlb \
-   ../01_fastqs/Falb_COL$INDEX.1.fastq \
-   ../01_fastqs/Falb_COL$INDEX.2.fastq \
-   > Falb_COL$INDEX.sam 2> Falb_COL$INDEX.log
-done
 ```
 
 Note that we are using the $INDEX variable in both the fastqs, the output, and the Read Group IDs.
@@ -114,13 +107,9 @@ I=samplename_sorted.bam
 ```
 
 Now let’s do this for our data. As before, we’ll run a test on one file, and then convert to a loop to process all BAMs.
+Take the SortSam command and edit it to sort one of the files.
 
 ```
-picard SortSam \
-I=Falb_COL1.sam \
-O=Falb_COL1.sorted.bam \
-SORT_ORDER=coordinate \
-CREATE_INDEX=true
 ```
 
 You can check to make sure you have a bam and a bam index (.bai) file with ls.
@@ -128,14 +117,6 @@ You can check to make sure you have a bam and a bam index (.bai) file with ls.
 Now let’s do a loop:
 
 ```
-for INDEX in 1 2 3 4 5 31 32 33 34 35
-do
-  picard SortSam \
-  I=Falb_COL$INDEX.sam \
-  O=Falb_COL$INDEX.sorted.bam \
-  SORT_ORDER=coordinate \
-  CREATE_INDEX=true
-done
 ```
 
 Alignment Metrics
@@ -181,14 +162,6 @@ We also recommend creating a deduplications metrics file, which will report the 
 Following deduplication make sure to sort and index your file again, as shown in the above section.
 
 ```
-for INDEX in 1 2 3 4 5 31 32 33 34 35
-do
-  picard SortSam \
-  I=Falb_COL$INDEX.dedup.bam \
-  O=Falb_COL$INDEX.final.bam \
-  SORT_ORDER=coordinate \
-  CREATE_INDEX=true
-done
 ```
 
 Validating BAM files
@@ -203,7 +176,7 @@ O=sample.validate.txt \
 MODE=SUMMARY
 ```
 
-Again, in the interest of time we will skip this today.
+As an exercise, convert this to a loop to run on all your files.
 
 At this point, we have an analysis-ready BAM. For some workflows, we would do indel realignment and base quality score recalibration at this point. These are described in more detail on the Informatics Pop Gen Tutorial, from which this workshop is derived.
 

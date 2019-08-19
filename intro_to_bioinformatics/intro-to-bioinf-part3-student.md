@@ -16,33 +16,24 @@ You'll see that for many commands, bedtools works by taking a 'query' bed file (
 
 Answer:
 ```
-bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed | head
-
-chr1	1015066	1015266	HSE897	9.5706324138	chr1	1017197	1051736	uc001acu.2
-chr1	1590473	1590673	HSE853	17.3206898329	chr1	1571099	1655775	uc001agv.1
-chr1	2120861	2121064	HSE86	66.0424471614	chr1	2115898	2126214	uc031pkt.1
-chr1	6336418	6336624	HSE394	14.8892086906	chr1	6324331	6453826	uc001amt.3
-chr1	7404594	7404794	HSE315	24.228051023	chr1	6845383	7829766	uc001aoi.3
-chr1	11941325	11941525	HSE322	17.5192630328	chr1	11917520	11918992	uc001atj.3
-chr1	15055555	15055755	HSE962	11.7065788965	chr1	14925212	15444544	uc001avm.4
-chr1	15478024	15478224	HSE354	17.5771586196	chr1	15438310	15478960	uc009voh.3
-chr1	16065307	16065508	HSE264	23.9092446094	chr1	16062808	16067884	uc001axb.1
-chr1	23244249	23244449	HSE434	17.1331422162	chr1	23243782	23247347	uc001bgg.1
 ```
-**Exercise**: in this case, does bedtools output a bed file? How could we convert this to a proper bed file, where we keep the score but replace the names (HSE####) with the closest gene? (Hint: think about UNIX tools)
 
-Answer: `bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed | awk -v OFS='\t' '{print $1, $2, $3, $9, $5}' | head`
+**Exercise**: in this case, does bedtools output a bed file? How could we convert this to a proper bed file, where we keep the score but replace the names (HSE####) with the closest gene? (Remember `awk '{print $1}` prints the first field of a file)?
+
+Answer:
+```
+```
 
 Okay, now let's make a file that contains the closest gene for each of the human-specific enhancers, in proper bed format, but we'll add two additional options (refer back to bedtools closest -h for the full option list): -d to give us the distance to the nearest gene, which we'll put in the 'score' field of the output bed file, and -t "first" means that if there are ties, we'll just keep one (so that we have each enhancer assigned to a single gene).
 
 `bedtools closest -a data/human_enhancers.bed -b data/ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $9, $10}' > hse_closest_genes.bed`
 
-**Exercise**: What do we need to change to get the equivalent set but for the common enhancers?
+**Exercise**: What do we need to change to get the equivalent set but for the common enhancers? Run bedtools first to see what the output looks like (piping to less or head), and then edit our awk command to get the correct fields to produce a bed file.
 
-Answer: The input file name for bed file 'A', the output file name, and the field numbers for the gene and score.
+Answer:
 ```
-bedtools closest -a data/common_enhancers.bed -b data/ucscGenes.bed -d -t "first" | awk -v OFS='\t' '{print $1, $2, $3, $7, $8}' > ce_closest_genes.bed
 ```
+
 Finding overlaps between intervals
 -------------
 
@@ -93,7 +84,10 @@ And now?
 
 **Exercise**: What if we wanted to get a new bed file with only the neural crest specific enhancers? That is, we want to filter out anything that overlaps (by even 1 bp) with a H3K27Ac peak in stem cells. Look at the bedtools intersect -h output and see if you can figure out what option to use to do this.
 
-Answer: `bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -v > human_nconly_enhancers.bed`
+Answer:
+```
+```
+
 
 Finally, we might want to generate a file where, for each neural crest enhancer in our list, we get the number of H1-hESC-H3K27Ac peaks it overlaps with. We'll use the `-c` option in bedtools for this. We'll also restrict overlaps to a reciprocal 20% -- so each feature in A has to overlap 25% of B, and vice versa, to count as an overlap.
 
@@ -102,8 +96,8 @@ bedtools intersect -a data/human_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -f 0.
 ```
 
 Now let's do the same thing with common enhancers:
+
 ```
-bedtools intersect -a data/common_enhancers.bed -b data/H1-hESC-H3K27Ac.bed -f 0.20 -r -c > common_overlaps.txt
 ```
 
 Get sequence from a bed file
@@ -117,12 +111,14 @@ bedtools sample -i data/dmel-genes.bed -n 10 > dmel-10genes.bed
 
 To get sequence for these genes, we can use bedtools getfasta:
 
-```bedtools getfasta -fi data/dmel-all-chromosome-r6.20.fasta -bed dmel-10genes.bed -name > dmel-10genes-bedtools.fasta
+```
+bedtools getfasta -fi data/dmel-all-chromosome-r6.20.fasta -bed dmel-10genes.bed -name > dmel-10genes-bedtools.fasta
 ```
 
 We need to use the name option to include the bed name field in the fasta definition line.
 
 We can also extract sequence with seqtk, which can take a bed file as an interval list:
+
 ```
 seqtk subseq data/dmel-all-chromosome-r6.20.fasta dmel-10genes.bed > dmel-10genes-seqtk.fa
 ```
@@ -136,8 +132,15 @@ Shuffling Intervals
 
 Let’s say we wanted to shuffle enhancers to random locations in the genome, but exclude them from known genes and introns (just allow them to fall in intergenic regions. Biologically this is not completely realistic, since enhancers can be in introns, but it will illustrate the procedure. We might want to do this to, for example, ask whether enhancers are closer to genes than might be expected by chance. To do this, we need to do a few steps:
 
-First, we make a bed file of intergenic regions (note we need to include a sort command):
+```
+bedtools complement -i data/ucscGenes.bed -g data/hg19.genome
+```
 
+There is an error; we need to sort the bed file. We can use bedtools sort and pipe the output to the input of bedtools complement.
+Note that when we pipe to bedtools, we need to use `-` to indicate which file is coming via the previous command.
+E.g., ```bedtools complement -i -``` would indicate that the input to complement is taken from stdout of the piped command.
+
+Now combining:
 ```
 bedtools sort -i data/ucscGenes.bed -faidx data/hg19.genome | bedtools complement -i - -g data/hg19.genome > hg19_intergenic.bed
 ```
