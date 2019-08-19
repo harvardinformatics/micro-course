@@ -86,6 +86,20 @@ models(so)
 ```{r,echo=TRUE}
 sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
 ```
+**Table columns**
+**target_id:** transcript name
+**pval:** p-value of the likelihood ratio test
+**qval:** false discovery rate adjusted p-value, using Benjamini-Hochberg
+**test_stat:** Chi-square test statistic of LRT
+**rss:** residual sum of squares under the null model
+**degrees_free:** degrees freedom for the LRT
+**mean_obs** mean of natural log counts of observations
+**var_obs:** variance of observations
+**tech_var:** technical variance of observations obtained from bootstraps
+**sigma_sq:** raw estimator of variance once technical variance has been removed
+**smooth_sigma_sq:** smooth regression fit for shrinkage estimation
+**final_sigma_sq:** max(sigma_sq, smooth_sigma_sq)
+
 13. And make a table that only includes the significantly DE transcripts
 ```{r,echo=TRUE}
 sleuth_significant <- dplyr::filter(sleuth_table, qval <= 0.05)
