@@ -3,7 +3,9 @@ title: 'FAS Informatics Nanocourse 2019: Differential Expression'
 output:
   html_document: default
 ---
-
+```{r setup}
+knitr::opts_knit$set(root.dir = "/n/scratchlfs/informatics/nanocourse/rna-seq/DE/my_analysis_dir")
+```
 
 # I. Preliminaries
 The goal of this workshop is to provide an introduction to differential expression analyses using RNA-seq data. While there are now many published methods for tackling specific steps, as well as full-blown pipelines, we will focus on two different approaches that have been show to be top performers with respect to controlling the false discovery rate. The first is using kallisto to estimate expression, in conjuction with sleuth to assess evidence for differential expression. This pipeline is based upon a recently developed approach that doesn't rely on traditional read alignment. The second relies on read mapping with bowtie2, implemented by the gold standard expression estimation tool RSEM, followed by differential expression analysis with limma voom. 
