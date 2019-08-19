@@ -3,7 +3,7 @@
 ## Manipulating files with awk
 ### What is awk?
 
-Invented in the 1970's, awk is a scripting language included in most Unix-like operating systems. It specializes in one-liner programs and manipulating text files.
+Invented in the 1970's, [awk](https://en.wikipedia.org/wiki/AWK) is a scripting language included in most Unix-like operating systems. It specializes in one-liner programs and manipulating text files.
 
 In many cases, if you're parsing information from a text file (such as a BED file, FASTA file, etc.), you could write a Python script...or you could do it with awk in a single line!
 
@@ -12,7 +12,7 @@ awk scripts are organized as:
 
 `awk 'pattern { action; other action }' file`
 
-Meaning that every time that the pattern is true, awk will execute the action in the brackets. By default the pattern matches every line, so the action will be taken every line in the input file, e.g. the following command that prints every line:
+Meaning that every time that the pattern is true, awk will execute the action in the brackets. If no pattern is specified, the action will be taken for every line in the input file, e.g. the following command prints every line:
 
 `awk '{print}' data/hg38.genome | less`
 
@@ -22,6 +22,10 @@ The two most important patterns are `BEGIN` and `END`, which tell the action to 
 
  The above line sets a variable at the start of the script, adds 1 to it every line, then prints its value at the end.
 
+If a variable hasn't been initialized, it is treated as 0 in numeric expressions, and an empty string in string expressions&mdash;awk will not print an error!
+So the following awk script also prints the number of lines in the file data/hg38.genome:
+
+`awk '{sum+=1} END {print sum}' data/hg38.genome`
 
 ### Input and output
 Input to awk is split into **records** and **fields**.
@@ -37,7 +41,8 @@ And if we wanted to print the second then the first:
 
 `awk '{print $2,$1}' data/hg38.genome | less`
 
-Note that the different fields are joined with commas when printing.
+Note that when the different fields are separated with commas in the `print` statement, they are joined by the output field separator (the **OFS** variable, described below), which is by default a space.
+If the comma is omitted between fields (e.g., `awk '{print $2 $1}'`, they are concatenated without a separator.
 <br/>
 <br/>
 
@@ -48,13 +53,15 @@ We can also print strings using using quotation marks:
 Which for every line of the file will print the text "First column:" followed by the value in the first field.
 
 ---
-awk has several other built-in variables that are very useful for parsing text:
+awk has several other built-in variables that are very useful for parsing text, including:
 
->FS: field separator (default: white space)<br/>
-OFS: output field separator, i.e. what character separates fields when printing<br/>
-RS: record separator, i.e. what character records are split on (default: new line)<br/>
-ORS: output record separator<br/>
-NR: number of records in input (# lines by default)
+|  |   |
+---|---|
+| **FS** | field separator (default: white space) |
+| **OFS** |  output field separator, i.e. what character separates fields when printing|
+| **RS** | record separator, i.e. what character records are split on (default: new line) |
+| **ORS** | output record separator |
+| **NR** | number of records in input (# lines by default) |
 
 Using these, we can convert between file formats, e.g. make a comma-separated text file into a tab-separated file:
 
@@ -68,23 +75,32 @@ Like other programming languages, awk allows conditional matching with if/else s
 
 awk uses the following conditional operators:
 
->'==': equal to  
-'!=': not equal to  
-'>': greater than  
-'>=': greater than or equal to  
-'<': less than    
-'<=': less than or equal to  
-'&&': AND  
-'||': OR
+| | |
+|-|-|
+|==|equal to|
+|!=|not equal to|
+|>|greater than|
+|>=|greater than or equal to|
+|<|less than|
+|<=|less than or equal to|
+|&&|AND|
+| \|\| |OR|
+| ! | NOT |
 
 In addition, awk also supports string matching using regular expressions, using the following expressions:
 
->'\~': matches  
-'!~' does not match
+| | |
+|-|-|
+|\~|matches|
+|!~|does not match|
 
 For string matching, the pattern being matched must be enclosed by slashes, like so:
 
 `awk '{if($1 ~ /pattern/) print}'`
+
+Note that if an action isn't specified, the default action is `{print}`, so the previous awk command is equivalent to the following, which specifies only a pattern expression:
+
+`awk '$1 ~ /pattern/'`
 
 ---
 ### Example uses:
@@ -100,7 +116,7 @@ For string matching, the pattern being matched must be enclosed by slashes, like
 
 - Convert from GFF (genome feature file) to BED file
 
-`grep -v '^#' data/dmel-all-no-analysis-r6.20.gff | awk 'BEGIN{FS="\t"; OFS="\t"} {print $1,$4-1,$5}' | less`
+`awk 'BEGIN{FS="\t"; OFS="\t"} !/^#/ {print $1,$4-1,$5}' data/dmel-all-no-analysis-r6.20.gff | less`
 
 **Note**: remember that BED and GFF files have different coordinate systems, i.e. BED start coordinate is 0 based, half-open, GFF is 1-based inclusive! Also, we are first using grep to skip the header lines in the GFF file.
 
@@ -111,14 +127,14 @@ Using awk:<br/>
 
 `awk 'BEGIN{FS="\t"; OFS="\t"} {if($3 ~ /CDS/) print $1,$4-1,$5}' data/dmel-all-no-analysis-r6.20.gff`
 
-- Extract FASTA information from the SAM file Falb_COL2.final.sam (hint: you will need to remove the header lines first, they start with @!) (Another hint: sequence ID = 1st column, sequence = 10th column)
+- Extract FASTA information from the SAM file Falb_COL2.final.sam (hint: you will need to remove the header lines first, they start with `@`!) (Another hint: sequence ID = 1st column, sequence = 10th column)
 
-`grep -v '^@' data/Falb_COL2.final.sam | awk 'BEGIN{FS="\t"; OFS="\n"} {print ">"$1,$10}' | less`
+`awk 'BEGIN{FS="\t"; OFS="\n"} !/^@/ {print ">"$1,$10}' data/Falb_COL2.final.sam | less`
 
 - Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it (hint: as above, need to remove headers)
 
-`grep -v '^@' data/Falb_COL2.final.sam | awk 'BEGIN{FS="\t"; sum=0} {sum+=$5} END{print sum/NR}'`
+`awk 'BEGIN{FS="\t"; sum=0} !/^@/ {sum+=$5} END{print sum/NR}' data/Falb_COL2.final.sam`
 
 - Calculate the average length of gene annotations *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
 
-`grep "2L" data/dmel-genes.bed | awk 'BEGIN{FS="\t"; sum=0} {len=$3-$2; sum=sum+len} END{print sum/NR}'`
+`awk 'BEGIN{FS="\t"; sum=0} $1 == "2L" {len=$3-$2; sum=sum+len} END{print sum/NR}' data/dmel-genes.bed`
