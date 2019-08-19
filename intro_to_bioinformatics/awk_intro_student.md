@@ -138,16 +138,11 @@ With this command, `!/^#/` is a pattern (like `BEGIN` or `END`) that tell awk to
 Using awk:<br/>
 - Pull out only the CDS annotations from the GFF file dmel-all-no-analysis-r6.20.gff and output them in BED format
 
-`awk 'BEGIN{FS="\t"; OFS="\t"} {if($3 ~ /CDS/) print $1,$4-1,$5}' data/dmel-all-no-analysis-r6.20.gff`
 
 - Extract FASTA information from the SAM file Falb_COL2.final.sam (hint: you will need to remove the header lines first, they start with `@`!) (Another hint: sequence ID = 1st column, sequence = 10th column)
 
-`awk 'BEGIN{FS="\t"; OFS="\n"} !/^@/ {print ">"$1,$10}' data/Falb_COL2.final.sam | less`
 
 - Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it (hint: as above, need to remove headers)
 
-`awk 'BEGIN{FS="\t"; sum=0} !/^@/ {sum+=$5} END{print sum/NR}' data/Falb_COL2.final.sam`
 
 - Calculate the average length of gene annotations *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
-
-`awk 'BEGIN{FS="\t"; sum=0} $1 == "2L" {len=$3-$2; sum=sum+len} END{print sum/NR}' data/dmel-genes.bed`

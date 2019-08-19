@@ -84,20 +84,11 @@ This command matches lines in the FASTA file that start with a ">" character, i.
 
 - How many sequences are in the file Falb_COL2.1.fastq?
 
-`grep -c '^@' data/Falb_COL2.1.fastq`
 
 - Filter out lines matching unassigned contigs (chrUn) in the file hg19.genome and direct the output to a file.
 
-`grep -v 'chrUn' data/hg19.genome  > hg19_noUn.genome`
 
 - Use grep to pull out the header line of **only** the 2R chromosome arm from dmel-all-chromosome-r6.20.fasta and direct the output to a file.
 
-`grep -w '^>2R' data/dmel-all-chromosome-r6.20.fasta > 2R_header.txt`
 
 - Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less
-
-```
-printf '^>%s\n' 2L 2R 3L 3R X > major_arms.txt
-grep -w -f major_arms.txt \
-data/dmel-all-no-analysis-r6.20.gff | less
-```
