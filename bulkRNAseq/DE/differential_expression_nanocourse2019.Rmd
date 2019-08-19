@@ -57,9 +57,9 @@ s2c <- mutate(s2c, path = kal_dirs)
 ## Create the sleuth object
 6. Run sleuth_prep. This will take a few minutes ...
 ```{r, echo=TRUE}
-so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE,read_bootstrap_tpm=TRUE)
+so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE,read_bootstrap_tpm=TRUE,transformation_function = function(x) log2(x + 0.5))
 ```
-Note, we do boostrap_summary = TRUE so we can do plots of bootstrap replicates to see how robust our differential expression calls are, and set read_bootstrap_tpm=TRUE to allow for later visualizatons in TPM units to be available.
+We do boostrap_summary = TRUE so we can do plots of bootstrap replicates to see how robust our differential expression calls are, and set read_bootstrap_tpm=TRUE to allow for later visualizatons in TPM units to be available.We specify a transformation function such that transformed abundance estimates are in log2 scale. While we use likelihood ratio tests in this workflow (see below), If one were to to Wald tests, or to do logfold change calculations on the transformed data in the sleuth object, the log2 scale is more interpretable with respect to logfold change. By default, sleuth does a natural log transformation.  
 
 7. At this point, you can do some quick and dirty, hard-coded visualzations of the expression data to make sure nothing looks wonky, although I'll show you shortly how to do something fancier by launching a local Shiny server to interactively query your data. You can do a PCA of your samples, and look at count densities by treatment, which ideally should not vary by treatment!
 ```{r}
@@ -88,25 +88,25 @@ models(so)
 ```{r,echo=TRUE}
 sleuth_table <- sleuth_results(so, 'reduced:full', 'lrt', show_all = FALSE)
 ```
-**Table columns**
-**target_id:** transcript name
-**pval:** p-value of the likelihood ratio test
-**qval:** false discovery rate adjusted p-value, using Benjamini-Hochberg
-**test_stat:** Chi-square test statistic of LRT
-**rss:** residual sum of squares under the null model
-**degrees_free:** degrees freedom for the LRT
-**mean_obs** mean of natural log counts of observations
-**var_obs:** variance of observations
-**tech_var:** technical variance of observations obtained from bootstraps
-**sigma_sq:** raw estimator of variance once technical variance has been removed
-**smooth_sigma_sq:** smooth regression fit for shrinkage estimation
-**final_sigma_sq:** max(sigma_sq, smooth_sigma_sq)
 
 13. And make a table that only includes the significantly DE transcripts
 ```{r,echo=TRUE}
 sleuth_significant <- dplyr::filter(sleuth_table, qval <= 0.05)
 head(sleuth_significant)
 ```
+**Table columns**  
+**target_id:** transcript name  
+**pval:** p-value of the likelihood ratio test  
+**qval:** false discovery rate adjusted p-value, using Benjamini-Hochberg  
+**test_stat:** Chi-square test statistic of LRT  
+**rss:** residual sum of squares under the null model  
+**degrees_free:** degrees freedom for the LRT  
+**mean_obs** mean of natural log counts of observations  
+**var_obs:** variance of observations  
+**tech_var:** technical variance of observations obtained from bootstraps  
+**sigma_sq:** raw estimator of variance once technical variance has been removed  
+**smooth_sigma_sq:** smooth regression fit for shrinkage estimation  
+**final_sigma_sq:** max(sigma_sq, smooth_sigma_sq)<br />
 If one does dim(sleuth_table) and dim(sleuth_significant), you will see that 2237/28095 transcripts (7.96%) are significantly DE.From here, you could write the table to a file using write.table or write.csv. E.g.
 ```{r,echo=TRUE}
 write.csv(sleuth_table,"sleuth_vanilla.csv",row.names=FALSE,quote=FALSE)
@@ -154,7 +154,7 @@ It's then a very simple matter to filter on significant transcripts and ratio of
 In most experiments with multiple factors, we want to understand their main effects, and to a lesser extent their interactions. The nature of contrasts are different between the vanilla experiment above, where the difference between high and low is done agnostic to population of origin, and a 2-factor additive model where the contrasts for each factor don't get confused with each other. 
 18. Rebuild the sleuth object
 ```{r,echo=TRUE}
-so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE,read_bootstrap_tpm=TRUE)
+so <- sleuth_prep(s2c, extra_bootstrap_summary = TRUE,read_bootstrap_tpm=TRUE,transformation_function = function(x) log2(x + 0.5))
 ```
 19. Fit the full model with temperature and population effects
 ```{r,echo=TRUE}
@@ -206,7 +206,7 @@ t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
 ```
 28. Rebuild sleuth object, aggregating by gene name:
 ```{r,echo=TRUE}
-so <- sleuth_prep(s2c, target_mapping = t2g,aggregation_column = 'ens_gene')
+so <- sleuth_prep(s2c, target_mapping = t2g,aggregation_column = 'ens_gene',transformation_function = function(x) log2(x + 0.5))
 ```
 29. Re-fit full model:
 ```{r,echo=TRUE}
