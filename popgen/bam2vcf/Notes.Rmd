@@ -1,14 +1,14 @@
-# Preliminary Steps 
-# 1.) Connect to VPN
-# 2.) Connect to virtual desktop
-# 	- type: 'vdi.rc.fas.harvard.edu' into address bar in browser
-# 	- or google FAS Harvard vdi and follow links
-# 3.) Click 'Interactive Apps' tab, and select Jupyter Lab
-# 4.) Wait for connection, then press blue 'Connect' box
-# 5.) Create a Terminal tab (and type "bash" so your prompt shows the current directory you're in) and a text file tab
-# 	- we will use the text file to take notes and write commands
-# 	- we will copy these commands into the terminal window
-#
+Preliminary Steps 
+1. Connect to VPN
+2. Connect to virtual desktop
+	- type: 'vdi.rc.fas.harvard.edu' into address bar in browser
+	- or google FAS Harvard vdi and follow links
+3. Click 'Interactive Apps' tab, and select Jupyter Lab
+4. Wait for connection, then press blue 'Connect' box
+5. Create a Terminal tab (and type "bash" so your prompt shows the current directory you're in) and a text file tab
+	- we will use the text file to take notes and write commands
+ 	- we will copy these commands into the terminal window
+
 # Today we will be talking about calling variants, which include SNPs and indels. Pipelines like the one we'll walk through today need to be used any
 # time you're interested in detecting mutational differences between samples, compared to using sequence reads to calculate relative abundance (e.g.
 # RNAseq differential expression, CHIPseq, ATACseq)
@@ -60,8 +60,8 @@
 # Let's get started! to run GATK, we need two things: the reference genome to which we mapped reads, and the mapped reads in BAM file format
 # You should have both of these form the last workshop session, but I provide them here in cased you missed it.
 #
-	DATA_DIR=/n/home11/bjarnold/workshops/bam2vcf_2019
-	ls $DATA_DIR
+	`DATA_DIR=/n/home11/bjarnold/workshops/bam2vcf_2019`
+	`ls $DATA_DIR`
 
 # there's also a file called "PicardPath.txt" that contains the file path to picard, which is on odyssey but not loaded as a module. Lets open this
 # file with "cat" and copy-paste this path into our notebook
