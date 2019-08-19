@@ -60,7 +60,7 @@ Preliminary Steps
 # Let's get started! to run GATK, we need two things: the reference genome to which we mapped reads, and the mapped reads in BAM file format
 # You should have both of these form the last workshop session, but I provide them here in cased you missed it.
 #
-	`DATA_DIR=/n/home11/bjarnold/workshops/bam2vcf_2019`
+	```DATA_DIR=/n/home11/bjarnold/workshops/bam2vcf_2019```
 	`ls $DATA_DIR`
 
 # there's also a file called "PicardPath.txt" that contains the file path to picard, which is on odyssey but not loaded as a module. Lets open this
