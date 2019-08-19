@@ -9,6 +9,15 @@ Preliminary Steps
 	- we will use the text file to take notes and write commands
  	- we will copy these commands into the terminal window
 
+```
+test
+```
+
+'''
+test
+'''
+
+
 # Today we will be talking about calling variants, which include SNPs and indels. Pipelines like the one we'll walk through today need to be used any
 # time you're interested in detecting mutational differences between samples, compared to using sequence reads to calculate relative abundance (e.g.
 # RNAseq differential expression, CHIPseq, ATACseq)
