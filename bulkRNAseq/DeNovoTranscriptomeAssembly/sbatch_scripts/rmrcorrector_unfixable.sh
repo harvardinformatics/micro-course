@@ -3,6 +3,7 @@
 #SBATCH -n 1                   # Number of cores 
 #SBATCH -t 01:00:00               # Runtime in days-hours:minutes 
 #SBATCH --mem 1500              # Memory in MB 
+#SBATCH -A informatics_workshop
 #SBATCH -J rmunfix               # job name 
 #SBATCH -o rmunfix.%A.out        # File to which standard out will be written 
 #SBATCH -e rmunfix.%A.err        # File to which standard err will be written 

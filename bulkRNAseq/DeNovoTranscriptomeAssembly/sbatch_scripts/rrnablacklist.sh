@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -n 12 
+#SBATCH -A informatics_workshop
 #SBATCH -t 06:00:00  
 #SBATCH -p shared,serial_requeue 
 #SBATCH --mem=24000  

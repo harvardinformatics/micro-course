@@ -2,6 +2,7 @@
 #SBATCH -N 1
 #SBATCH -n 16
 #SBATCH -p shared,serial_requeue            
+#SBATCH -A informatics_workshop
 #SBATCH -e rs_pt1_%A.err        # File to which STDERR will be written
 #SBATCH -o rs_pt1_%A.out        # File to which STDOUT will be written
 #SBATCH -J rs_pt1               # Job name
