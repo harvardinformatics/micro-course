@@ -145,7 +145,7 @@ gatk GenomicsDBImport \
 -V $GVCF_DIR/Falb_COL35.raw.g.vcf 
 ```
 
-### 	NOTE: GenotypeGVCFs: DB -> VCF
+### GenotypeGVCFs: DB -> VCF
 Finally, lets generate our VCF file.
 
 ```
