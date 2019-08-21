@@ -1,9 +1,10 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -n 8
+#SBATCH --reservation=bioinformatics
 #SBATCH -A informatics_workshop
 #SBATCH -t 00:20:00  
-#SBATCH -p shared,serial_requeue 
+#SBATCH -p general
 #SBATCH --mem=24000  
 #SBATCH -e blacklist_ERR1101637_%A.e
 #SBATCH -o blacklist_ERR1101637_%A.o

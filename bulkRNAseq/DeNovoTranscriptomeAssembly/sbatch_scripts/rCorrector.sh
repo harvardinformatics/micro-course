@@ -1,7 +1,8 @@
 #!/bin/bash 
 #SBATCH -N 1
 #SBATCH -n 8
-#SBATCH -p serial_requeue,shared
+#SBATCH -p general
+#SBATCH --reservation=bioinformatics
 #SBATCH -A informatics_workshop
 #SBATCH -e rcorrector_%A.e
 #SBATCH -o rcorrector_%A.o
