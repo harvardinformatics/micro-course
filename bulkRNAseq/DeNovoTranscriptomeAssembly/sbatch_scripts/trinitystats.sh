@@ -1,7 +1,6 @@
 #!/bin/bash 
 #SBATCH -p shared,serial_requeue       # Partition to submit to 
 #SBATCH -n 1                   # Number of cores 
-#SBATCH --reservation=bioinformatics
 #SBATCH -A informatics_workshop
 #SBATCH -t 00:20:00               # Runtime in days-hours:minutes 
 #SBATCH --mem 1500              # Memory in MB 
