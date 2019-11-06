@@ -9,18 +9,18 @@ We’ll focus on the following the following file formats (click on the links fo
  * [BED](https://genome.ucsc.edu/FAQ/FAQformat.html#format1) (a flexible format for storing any kind of interval data)
  * [SAM/BAM](https://samtools.github.io/hts-specs/SAMv1.pdf) (the dominant formats for storing reference-based alignments of sequence data to a genome)
 
-In the morning, we'll cover fastq/fasta, gff, and bed files, as well as some useful Unix tricks. In the afternoon, we'll cover read mapping and sam/bam files.
+In this session, we'll cover fastq/fasta, gff, and bed files, as well as some useful Unix tricks.
 
 Setup - Navigating the File System
 ----------
 
 You'll need to copy some data to work with the examples below. We'll use this as an opportunity to quickly review navigating the file system using the command line.  
 
-```
-ADD STUFF ABOUT UNIX FILE SYSTEMS, ROOT ETC.
+At the highest level in the structure is the root, signified by a forward slash `/`, which contains all lower directories (aka 'folders'). The path to all other directories 'lower' in the tree are also separated by a `/`. For example, to specify the path for a directory called 'bin' that is contained within the directory called 'usr' (i.e. two levels 'down' from root), we'd type `/usr/bin`. This is referred to as the **absolute path**, where the location of a directory/file is specified from the root directory.
 
-RELATIVE VS ABSOLUTE PATHS, ETC.
-```  
+If instead we didn't put the first `/` in the path, the shell would look in the *current directory* for a directory called 'usr', and would probably say that the directory doesn't exist. This is referred to as the **relative path**, where the path starts in the present working directory. Be careful not to get the two mixed up!
+
+-----
 There are several vital commands for navigating your way around a file system:
 ```
 pwd: 'present working directory'. This prints where in your file system you currently are. If you ever get lost, use this!
@@ -30,17 +30,15 @@ ls: 'list'. This prints the contents of the directory you are in
 cd: 'change directory'. This moves you to a different directory that you specify.
 
 mkdir: 'make directory'. This creates a directory in your current directory or wherever you specify.
-
-cp: 'copy'. Copies a specified file or directory to a location that you specify.
 ```
 
-First we want to make a new directory, using the `mkdir` command, to put the data you copy:
+Now let's actually copy the data we need! First we want to make a new directory, using the `mkdir` command, to put the data you copy:
 
 ```
 mkdir -p intro_bioinf_2019
 ```
 
-A few things to note: first, a general command in UNIX will be a program (`mkdir`) followed by options (`-p`, which means "create this directory/directories, including any parent directories, and don't error if any already exist").
+A few things to note: first, since we don't specify the absolute path, it creates the directory within our current directory. Second, a general command in UNIX will be a program (`mkdir`) followed by options (`-p`, which means "create this directory/directories, including any parent directories, and don't error if any already exist").
 Options will either start with:
 * `-` (for short/single-letter options, which can be combined; e.g., `mkdir -pv` is equivalent to `mkdir -p -v` ), or
 * `--` (for long/multi-character options; e.g. `mkdir --parents --verbose`)
@@ -56,7 +54,7 @@ mkdir --help
 
 *NOTE: this will not work on macOS; use the [man pages](https://en.wikipedia.org/wiki/Man_page) instead (e.g., `man mkdir`)*
 
-Now let's copy some data. We want to copy all the files from `/n/holylfs/LABS/informatics/workshops/bionano-gtt-data/` into a new subdirectory (`data`) in the directory we just made.
+Now let's copy the data. We want to copy all the files from `/n/holylfs/LABS/informatics/workshops/bionano-gtt-data/` into a new subdirectory (`data`) in the directory we just made.
 
 First we need to make the data subdirectory:
 
@@ -73,7 +71,7 @@ mkdir intro_bioinf_2019/data
 
 In the first case, we first move into the directory with `cd` and then use mkdir to make a new directory in the current working directory.
 
-In the second case, we don't move where we are on the file system, instead we specify path we want to create. Note that this is still *relative* to our current directory. We could do this instead with an *absolute* path, which starts from / (the root of the fileystem). We'll see this in the copy command. **NOTE** you may need to change this command depending on where in the filesystem you are. If you are not sure, use `pwd` to **p** rint **w** orking **d** irectory.
+In the second case, we don't move where we are on the file system, instead we specify path we want to create. Note that this is still *relative* to our current directory. We could do this instead with an *absolute* path, which starts from the root of the fileystem. We'll see this in the copy command. **NOTE** you may need to change this command depending on where in the filesystem you are. If you are not sure, use `pwd` to **p** rint **w** orking **d** irectory.
 
 Assuming you executed `mkdir intro_bioinf_2019/data`:
 ```
@@ -168,7 +166,7 @@ seqtk subseq data/dmel-all-chromosome-r6.20.fasta seqtk.regions > dmel-X.seqtk.f
 
 Option 2: using samtools
 
-We can also use samtools, which is faster for just one region but inefficient for many sequences.
+We can also use a different program called samtools, which is faster for just one region but inefficient for many sequences.
 
 ```
 samtools faidx data/dmel-all-chromosome-r6.20.fasta X > dmel-X.samtools.fa
@@ -198,7 +196,7 @@ Many bioinformatics utilities can read their input from pipes.
 
 Manipulating files with grep
 --------
-We've explored a little bit with how to fish information out of files. grep is a powerful command-line search tools that is included as part of most Unix-like systems. It is one of the most useful tools in bioinformatics! At the most basic level, grep searches for a string of characters that match a pattern and will print lines containing a match. Basic syntax is:  
+We've explored a little bit with how to fish information out of sequence files using programs like seqtk and samtools, but we'd like something a little more robust. **grep** is a powerful command-line search tools that is included as part of most Unix-like systems. It is one of the most useful tools in bioinformatics! At the most basic level, grep searches for a string of characters that match a pattern and will print lines containing a match. Basic syntax is:  
 
 `grep 'pattern' file_to_search`  
 
