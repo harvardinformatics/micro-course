@@ -287,7 +287,7 @@ This command matches lines in the FASTA file that start with a ">" character, i.
 
 `grep -w '^>2R' data/dmel-all-chromosome-r6.20.fasta > 2R_header.txt`
 
-- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less
+- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less. Hint: `printf '^>%s\n' 2L 2R 3L 3R X > major_arms.txt`
 
 ```
 printf '^>%s\n' 2L 2R 3L 3R X > major_arms.txt
