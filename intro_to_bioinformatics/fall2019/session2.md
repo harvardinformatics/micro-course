@@ -1,7 +1,7 @@
 Interval and annotations data (BED, GFF)
 --------
 
-Now, we are going to move on from fasta files (although we'll come back to them in a bit) and introduce files with data stored as genomic intervals. Of course this includes things like gene models, but also the output of peak callers, enhancer predictions, and many other things. We’ll focus on two file formats, gff and bed. In both cases intervals are represented as lines in the file with a chromosome, start position, and end position specified. Confusingly, bed files use a 0-based start (first base of a chromosome is 0), and a 1-based end, while GFF files use a consistent 1-based interval. This is clearer with an example:
+In this session, we are going to move on from fasta files (although we'll come back to them in a bit) and introduce files with data stored as genomic intervals. Of course this includes things like gene models, but also the output of peak callers, enhancer predictions, and many other things. We’ll focus on two file formats, gff and bed. In both cases intervals are represented as lines in the file with a chromosome, start position, and end position specified. Confusingly, bed files use a 0-based start (first base of a chromosome is 0), and a 1-based end, while GFF files use a consistent 1-based interval. This is clearer with an example:
 
 The interval from the first base to the hundredth base of a chromosome would be represented as start = 0, end = 100 in a bed file, and start = 1, end = 100 in a GFF. Another way to think about this is that bed files are 0-based, half-open (the start is included in the interval but not the end), while GFF are 1-based inclusive (both start and end are included). This is super-confusing and will take a while to get used to.
 
@@ -21,7 +21,7 @@ What we really want is actually just the unique values. To do this, we can combi
 cut -s -f 3 data/Homo_sapiens.GRCh38.91.gff3 | sort | uniq -c
 ```
 
-`uniq` collapses duplicate adjacect lines into a single copy, which is prefixed by a count via the `-c` option.
+`uniq` collapses duplicate adjacent lines into a single copy, which is prefixed by a count via the `-c` option.
 The lines are first `sort`ed so each count reflects the the number of occurrences of a line in the entire input.
 
 Finally, let's briefly look at a BED file before moving on to some more advanced Unix tricks that will help us work with these files.
@@ -103,7 +103,7 @@ awk has several other built-in variables that are very useful for parsing text, 
 
 Using these, we can convert between file formats, e.g. make a comma-separated text file into a tab-separated file:
 
-`awk 'BEGIN{FS="," ; OFS="\t"} {print $0}' data/enhancers.csv > data/enhancers.tsv`
+`awk 'BEGIN{FS="," ; OFS="\t"} {print $1,$2,$3}' data/enhancers.csv > data/enhancers.tsv`
 
 
 ### Conditionals and pattern matching
@@ -147,7 +147,7 @@ Note that if an action isn't specified, the default action is `{print}`, so the 
 
 `awk 'END{print NR/4}' data/Falb_COL2.1.fastq`
 
-**Note**: this is technically safer than the command we looked at earlier using grep, as yo don't have to worry about accidentally counting the quality line.
+**Note**: this is technically safer than the command we looked at earlier using grep, as you don't have to worry about accidentally counting the quality line.
 
 - Only print annotations on a specific scaffold (chr1) that fall between 1Mb and 2Mb:
 
@@ -178,17 +178,13 @@ Using awk:<br/>
 
 `awk 'BEGIN{FS="\t"; OFS="\t"} {if($3 ~ /CDS/) print $1,$4-1,$5}' data/dmel-all-no-analysis-r6.20.gff`
 
-- Extract FASTA information from the SAM file Falb_COL2.final.sam (hint: you will need to remove the header lines first, they start with `@`!) (Another hint: sequence ID = 1st column, sequence = 10th column)
-
-`awk 'BEGIN{FS="\t"; OFS="\n"} !/^@/ {print ">"$1,$10}' data/Falb_COL2.final.sam | less`
-
-- Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it (hint: as above, need to remove headers)
-
-`awk 'BEGIN{FS="\t"; sum=0} !/^@/ {sum+=$5} END{print sum/NR}' data/Falb_COL2.final.sam`
-
 - Calculate the average length of gene annotations *only on the 2L arm* from the file dmel-genes.bed (hint: you'll need to use a combination of grep and awk...)
 
 `awk 'BEGIN{FS="\t"; sum=0} $1 == "2L" {len=$3-$2; sum=sum+len} END{print sum/NR}' data/dmel-genes.bed`
+
+- Write a command to calculate that average of the 5th column (i.e. mapping quality score) of a tab-separated SAM file Falb_COL2.final.sam and output it (hint: you will need to remove the header lines first, they start with `@`!)
+
+`awk 'BEGIN{FS="\t"; sum=0} !/^@/ {sum+=$5} END{print sum/NR}' data/Falb_COL2.final.sam`
 
 
 Genomic Ranges

@@ -268,7 +268,7 @@ Note that if we want to match any of these special characters literally (e.g. ma
 
 One example of how regex can come in handy is using the ^ special character to quickly count how many sequences are in a FASTA file, which we would do as follows:
 
-`grep -c '^>' data/mel-all-chromosome-r6.20.fasta`
+`grep -c '^>' data/dmel-all-chromosome-r6.20.fasta`
 
 This command matches lines in the FASTA file that start with a ">" character, i.e. the header lines, and uses the -c argument to count how many matches!
 
@@ -287,7 +287,7 @@ This command matches lines in the FASTA file that start with a ">" character, i.
 
 `grep -w '^>2R' data/dmel-all-chromosome-r6.20.fasta > 2R_header.txt`
 
-- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less. Hint: `printf '^>%s\n' 2L 2R 3L 3R X > major_arms.txt`
+- Use grep to extract the lines of only the *major chromosome arms* (2L, 2R, 3L, 3R, and X) from the file dmel-all-no-analysis-r6.20.gff and pipe to less. Hint: `printf '%s\n' 2L 2R 3L 3R X > major_arms.txt`
 
 ```
 printf '^>%s\n' 2L 2R 3L 3R X > major_arms.txt
