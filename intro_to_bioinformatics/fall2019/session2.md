@@ -103,7 +103,7 @@ awk has several other built-in variables that are very useful for parsing text, 
 
 Using these, we can convert between file formats, e.g. make a comma-separated text file into a tab-separated file:
 
-`awk 'BEGIN{FS="," ; OFS="\t"} {print $1,$2,$3}' data/enhancers.csv > data/enhancers.tsv`
+`awk 'BEGIN{FS="," ; OFS="\t"} {print $1,$2,$3,$4,$5}' data/enhancers.csv > data/enhancers.tsv`
 
 
 ### Conditionals and pattern matching
@@ -316,7 +316,7 @@ We can also extract sequence with seqtk, which can take a bed file as an interva
 seqtk subseq data/dmel-all-chromosome-r6.20.fasta dmel-10genes.bed > dmel-10genes-seqtk.fa
 ```
 
-###maybe cut this section??
+
 Anything different between the files?
 
 We are going to look at one more use of bedtools, but first let’s do an exercise that will show you how you can string a lot of commands together to accomplish a task. The goal is to get the DNA sequence for 10 random exons from chromosome 2L in D. melanogaster. Take this in steps, and you can do testing using temporary files but in the end you’ll need to link everything in one command.
