@@ -1,0 +1,5 @@
+Sample	Species	
+sample1	Homo sapiens	
+sample2	Pan troglodytes	
+sample3	Homo sapiens	
+sample4	Macaca mulatta	
